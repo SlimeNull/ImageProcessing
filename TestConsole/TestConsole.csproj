@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LibImageFilter\LibImageProcessing.csproj" />
+    <ProjectReference Include="..\LibImageProcessing\LibImageProcessing.csproj" />
   </ItemGroup>
 
 </Project>
