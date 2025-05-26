@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using LibImageFilter;
+using LibImageProcessing;
 using SkiaSharp;
 
 Console.WriteLine("Hello, World!");

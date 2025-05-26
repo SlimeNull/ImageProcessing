@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace LibImageFilter
+namespace LibImageProcessing
 {
     public class HsvRangeProcessor : DxImageProcessor
     {

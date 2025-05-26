@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SkiaSharp;
 
-namespace LibImageFilter
+namespace LibImageProcessing
 {
     public class ImageProcessing
     {

@@ -10,7 +10,7 @@ using Silk.NET.Direct3D.Compilers;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
 
-namespace LibImageFilter
+namespace LibImageProcessing
 {
     public unsafe abstract class DxImageProcessor : IImageProcessor
     {

@@ -1,4 +1,4 @@
-﻿namespace LibImageFilter
+﻿namespace LibImageProcessing
 {
     public interface IImageProcessor
     {

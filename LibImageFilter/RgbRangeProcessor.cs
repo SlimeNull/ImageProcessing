@@ -1,7 +1,7 @@
 ﻿using Silk.NET.Direct3D11;
 using SkiaSharp;
 
-namespace LibImageFilter
+namespace LibImageProcessing
 {
     public class RgbRangeProcessor : DxImageProcessor
     {
