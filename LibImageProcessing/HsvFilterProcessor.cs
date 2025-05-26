@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LibImageProcessing
+﻿namespace LibImageProcessing
 {
-    public class RgbFilterProcessor : DxImageProcessor
+    public class HsvFilterProcessor : DxImageProcessor
     {
-        public RgbFilterProcessor(int inputWidth, int inputHeight, string filter) : base(inputWidth, inputHeight)
+        public HsvFilterProcessor(int inputWidth, int inputHeight, string filter) : base(inputWidth, inputHeight)
         {
             ArgumentNullException.ThrowIfNull(filter);
-            
+
             Filter = filter;
         }
 
@@ -163,6 +157,30 @@ namespace LibImageProcessing
                 
                     return hsl;
                 }
+                                
+                float3 hsvToRgb(float3 hsv) {
+                    float h = hsv.x;
+                    float s = hsv.y;
+                    float v = hsv.z;
+                    float c = v * s; // 色彩强度
+                    float x = c * (1 - abs(fmod(h * 6.0, 2.0) - 1));
+                    float m = v - c;
+                    float3 rgb = float3(0, 0, 0);
+                    if (h < 1.0 / 6.0) {
+                        rgb = float3(c, x, 0);
+                    } else if (h < 2.0 / 6.0) {
+                        rgb = float3(x, c, 0);
+                    } else if (h < 3.0 / 6.0) {
+                        rgb = float3(0, c, x);
+                    } else if (h < 4.0 / 6.0) {
+                        rgb = float3(0, x, c);
+                    } else if (h < 5.0 / 6.0) {
+                        rgb = float3(x, 0, c);
+                    } else {
+                        rgb = float3(c, 0, x);
+                    }
+                    return rgb + float3(m, m, m);
+                }
 
                 vs_out vs_main(vs_in input) 
                 {
@@ -183,7 +201,7 @@ namespace LibImageProcessing
                     float3 hsl = rgbToHsl(rgb);
                     float4 hsla = float4(hsl, rgba.w);
 
-                    return {{colorExpression}};
+                    return hsvToRgb({{colorExpression}});
                 }
                 """;
         }

@@ -10,25 +10,25 @@ namespace LibImageProcessing
             float hueMax, float saturationMax, float lightnessMax, float alphaMax,
             SKColor other) : base(inputWidth, inputHeight)
         {
-            HMin = hueMin;
-            SMin = saturationMin;
-            LMin = lightnessMin;
-            AMin = alphaMin;
-            HMax = hueMax;
-            SMax = saturationMax;
-            LMax = lightnessMax;
-            AMax = alphaMax;
+            HueMin = hueMin;
+            SaturationMin = saturationMin;
+            LightnessMin = lightnessMin;
+            AlphaMin = alphaMin;
+            HueMax = hueMax;
+            SaturationMax = saturationMax;
+            LightnessMax = lightnessMax;
+            AlphaMax = alphaMax;
             Other = other;
         }
 
-        public float HMin { get; }
-        public float SMin { get; }
-        public float LMin { get; }
-        public float AMin { get; }
-        public float HMax { get; }
-        public float SMax { get; }
-        public float LMax { get; }
-        public float AMax { get; }
+        public float HueMin { get; }
+        public float SaturationMin { get; }
+        public float LightnessMin { get; }
+        public float AlphaMin { get; }
+        public float HueMax { get; }
+        public float SaturationMax { get; }
+        public float LightnessMax { get; }
+        public float AlphaMax { get; }
         public SKColor Other { get; }
 
         public override int OutputWidth => InputWidth;
@@ -128,10 +128,10 @@ namespace LibImageProcessing
                     float4 rgba = _texture.Sample(_sampler, float2(input.position.x / {{InputWidth}}, input.position.y / {{InputHeight}}));
                     float4 hsla = float4(rgbToHsl(rgba.xyz), rgba.w);
 
-                    if (hsla.x < {{HMin}} || hsla.x > {{HMax}} ||
-                        hsla.y < {{SMin}} || hsla.y > {{SMax}} ||
-                        hsla.z < {{LMin}} || hsla.z > {{LMax}} ||
-                        hsla.w < {{AMin}} || hsla.w > {{AMax}})
+                    if (hsla.x < {{HueMin}} || hsla.x > {{HueMax}} ||
+                        hsla.y < {{SaturationMin}} || hsla.y > {{SaturationMax}} ||
+                        hsla.z < {{LightnessMin}} || hsla.z > {{LightnessMax}} ||
+                        hsla.w < {{AlphaMin}} || hsla.w > {{AlphaMax}})
                     {
                         return float4({{Other.Red / 255.0f}}, {{Other.Green / 255.0f}}, {{Other.Blue / 255.0f}}, rgba.w);
                     }
