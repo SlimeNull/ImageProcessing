@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace ImageFilter
+namespace ImageProcessingWpf
 {
     /// <summary>
     /// Interaction logic for App.xaml
