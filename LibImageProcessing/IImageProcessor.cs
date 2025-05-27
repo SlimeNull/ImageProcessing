@@ -1,6 +1,6 @@
 ﻿namespace LibImageProcessing
 {
-    public interface IImageProcessor
+    public interface IImageProcessor : IDisposable
     {
         int InputWidth { get; }
         int InputHeight { get; }

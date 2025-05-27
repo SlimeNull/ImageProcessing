@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using LibImageProcessing.Extensions;
 using Silk.NET.Core.Native;
 using Silk.NET.Direct3D.Compilers;
 using Silk.NET.Direct3D11;
@@ -33,6 +34,7 @@ namespace LibImageProcessing
         private int _inputWidth;
         private int _inputHeight;
         private float[]? _background;
+        private bool _disposedValue;
 
         public int InputWidth => _inputWidth;
         public int InputHeight => _inputHeight;
@@ -317,6 +319,48 @@ namespace LibImageProcessing
                 samplerState.Dispose();
                 inputTexture.Dispose();
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: 释放托管状态(托管对象)
+                }
+
+                _api?.Dispose();
+                _compiler?.Dispose();
+
+                _device.DisposeIfNotNull();
+                _deviceContext.DisposeIfNotNull();
+                _renderTarget.DisposeIfNotNull();
+                _outputBuffer.DisposeIfNotNull();
+                _vertexBuffer.DisposeIfNotNull();
+                _indexBuffer.DisposeIfNotNull();
+                //_vertexShaderCode.DisposeIfNotNull();
+                //_pixelShaderCode.DisposeIfNotNull();
+                _vertexShader.DisposeIfNotNull();
+                _pixelShader.DisposeIfNotNull();
+                _inputLayout.DisposeIfNotNull();
+
+                _disposedValue = true;
+            }
+        }
+
+        // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+        ~DxImageProcessor()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

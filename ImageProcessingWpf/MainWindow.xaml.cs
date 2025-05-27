@@ -163,6 +163,13 @@ namespace ImageProcessingWpf
                 ProgressCurrent = 0;
                 StatusText = "Failed to process";
             }
+            finally
+            {
+                foreach (var imageProcessor in imageProcessors)
+                {
+                    imageProcessor.Dispose();
+                }
+            }
         }
 
         private void ProcessThread()
