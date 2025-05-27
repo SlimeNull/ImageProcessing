@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LibImageProcessing.Helpers;
 
 namespace LibImageProcessing
 {
     public class RgbFilterProcessor : DxImageProcessor
     {
+        private readonly string? _shaderColorExpression;
+
         public RgbFilterProcessor(int inputWidth, int inputHeight, string filter) : base(inputWidth, inputHeight)
         {
             ArgumentNullException.ThrowIfNull(filter);
+            if (!ShaderColorExpressionParser.GetShaderExpressionForFilter(filter, out _shaderColorExpression))
+            {
+                throw new ArgumentException(nameof(filter));
+            }
             
             Filter = filter;
         }
@@ -23,16 +30,6 @@ namespace LibImageProcessing
 
         protected internal override string GetShaderCode()
         {
-            var filterCompoments = Filter.Split(',');
-
-            var colorExpression = filterCompoments.Length switch
-            {
-                1 => $"float4({filterCompoments[0]}, {filterCompoments[0]}, {filterCompoments[0]}, 1.0)",
-                3 => $"float4({filterCompoments[0]}, {filterCompoments[1]}, {filterCompoments[2]}, 1.0)",
-                4 => $"float4({filterCompoments[0]}, {filterCompoments[1]}, {filterCompoments[2]}, {filterCompoments[3]})",
-                _ => "float4(0, 0, 0, 0)"
-            };
-
             return $$"""
                 Texture2D    _texture;
                 SamplerState _sampler;
@@ -183,7 +180,7 @@ namespace LibImageProcessing
                     float3 hsl = rgbToHsl(rgb);
                     float4 hsla = float4(hsl, rgba.w);
 
-                    return {{colorExpression}};
+                    return {{_shaderColorExpression}};
                 }
                 """;
         }

@@ -34,7 +34,7 @@ namespace LibImageProcessing
             processor.Process(source.GetPixelSpan(), dest.GetPixelSpan());
         }
 
-        public static void Process(SKBitmap source, SKBitmap dest, params IImageProcessor[] processors)
+        public static void Process(SKBitmap source, SKBitmap dest, IReadOnlyList<IImageProcessor> processors)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(dest);
@@ -51,7 +51,7 @@ namespace LibImageProcessing
             }
 
             SKSizeI finalSize = new SKSizeI(source.Width, source.Height);
-            for (int processorIndex = 0; processorIndex < processors.Length; processorIndex++)
+            for (int processorIndex = 0; processorIndex < processors.Count; processorIndex++)
             {
                 IImageProcessor? processor = processors[processorIndex];
                 if (processor.InputWidth != finalSize.Width ||
@@ -71,35 +71,110 @@ namespace LibImageProcessing
 
             Dictionary<SKSizeI, SKBitmap> buffers = new Dictionary<SKSizeI, SKBitmap>();
             Dictionary<SKSizeI, SKBitmap> alterBuffers = new Dictionary<SKSizeI, SKBitmap>();
-            buffers[finalSize] = dest;
 
-            foreach (var processor in processors)
+            for (int processorIndex = 0; processorIndex < processors.Count; processorIndex++)
             {
+                IImageProcessor? processor = processors[processorIndex];
+                var isFirstProcessor = processorIndex == 0;
+                var isLastProcessor = processorIndex == processors.Count - 1;
+
                 var processorInputSize = new SKSizeI(processor.InputWidth, processor.InputHeight);
                 var processorOutputSize = new SKSizeI(processor.OutputWidth, processor.OutputHeight);
 
-                if (!buffers.ContainsKey(processorInputSize))
+                SKBitmap? inputBuffer = null;
+                SKBitmap? outputBuffer = null;
+                if (!isFirstProcessor &&
+                    !buffers.ContainsKey(processorInputSize))
                 {
-                    buffers[processorInputSize] = new SKBitmap(processorInputSize.Width, processorInputSize.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+                    inputBuffer = new SKBitmap(processorInputSize.Width, processorInputSize.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
                 }
 
-                if (!buffers.ContainsKey(processorOutputSize))
+                if (!isLastProcessor &&
+                    !buffers.ContainsKey(processorOutputSize))
                 {
-                    buffers[processorOutputSize] = new SKBitmap(processorOutputSize.Width, processorOutputSize.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+                    outputBuffer = new SKBitmap(processorOutputSize.Width, processorOutputSize.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
                 }
 
-                if (processorInputSize == processorOutputSize &&
-                    !alterBuffers.ContainsKey(processorOutputSize))
+                if (inputBuffer is not null)
                 {
-                    alterBuffers[processorOutputSize] = new SKBitmap(processorOutputSize.Width, processorOutputSize.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+                    buffers[processorInputSize] = inputBuffer;
+                }
+
+                if (outputBuffer is not null)
+                {
+                    if (!buffers.ContainsKey(processorOutputSize))
+                    {
+                        buffers[processorOutputSize] = outputBuffer;
+                    }
+                    else
+                    {
+                        alterBuffers[processorOutputSize] = outputBuffer;
+                    }
                 }
             }
 
             SKBitmap currentInput = source;
-            foreach (var processor in processors)
+            for (int processorIndex = 0; processorIndex < processors.Count; processorIndex++)
             {
+                IImageProcessor processor = processors[processorIndex];
+                var isFirstProcessor = processorIndex == 0;
+                var isLastProcessor = processorIndex == processors.Count - 1;
 
+                var inputSize = new SKSizeI(processor.InputWidth, processor.InputHeight);
+                var outputSize = new SKSizeI(processor.OutputWidth, processor.OutputHeight);
+
+                SKBitmap? outputBuffer;
+                if (!isLastProcessor)
+                {
+                    if (buffers.TryGetValue(outputSize, out outputBuffer))
+                    {
+                        buffers.Remove(outputSize);
+                    }
+                    else if (alterBuffers.TryGetValue(outputSize, out outputBuffer))
+                    {
+                        alterBuffers.Remove(outputSize);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("This would never happen");
+                    }
+                }
+                else
+                {
+                    outputBuffer = dest;
+                }
+
+                processor.Process(currentInput.GetPixelSpan(), outputBuffer.GetPixelSpan());
+
+                if (!isFirstProcessor)
+                {
+                    if (!buffers.ContainsKey(inputSize))
+                    {
+                        buffers[inputSize] = currentInput;
+                    }
+                    else if (!alterBuffers.ContainsKey(inputSize))
+                    {
+                        alterBuffers[inputSize] = currentInput;
+                    }
+                }
+
+                currentInput = outputBuffer;
             }
+
+            foreach (var buffer in buffers.Values)
+            {
+                buffer.Dispose();
+            }
+
+            foreach (var buffer in alterBuffers.Values)
+            {
+                buffer.Dispose();
+            }
+        }
+
+        public static void Process(SKBitmap source, SKBitmap dest, params IImageProcessor[] processors)
+        {
+            Process(source, dest, processors);
         }
 
         public static SKBitmap Process(SKBitmap source, IImageProcessor processor)

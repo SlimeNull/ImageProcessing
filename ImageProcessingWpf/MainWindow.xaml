@@ -63,6 +63,13 @@
                                      Command="{Binding OpenImageCommand}"/>
                     </ws:MenuItem>
                 </ws:Menu>
+                <StatusBar DockPanel.Dock="Bottom">
+                    <StatusBarItem>
+                        <ProgressBar Width="100"
+                                     Height="16"/>
+                    </StatusBarItem>
+                    <StatusBarItem Content="qwq"/>
+                </StatusBar>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
@@ -129,7 +136,12 @@
                                         <ws:Expander.Header>
                                             <TextBlock Text="{Binding Name}"/>
                                         </ws:Expander.Header>
-
+                                        <ws:Expander.Resources>
+                                            <DataTemplate DataType="{x:Type m:RgbFilterProcessorInfo}">
+                                                <TextBox Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DataTemplate>
+                                        </ws:Expander.Resources>
+                                        <ContentControl Content="{Binding}"/>
                                     </ws:Expander>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
