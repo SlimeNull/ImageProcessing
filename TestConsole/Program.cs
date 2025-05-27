@@ -1,23 +1,22 @@
-﻿// 示例使用
-using Irony.Parsing;
+﻿using LibImageProcessing;
+using SkiaSharp;
 
-public class Program
+List<IImageProcessor> imageProcessors = new List<IImageProcessor>();
+SKBitmap input = new SKBitmap(2000, 2000, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+SKBitmap output = new SKBitmap(2000, 2000, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+for (int i = 0; i < 20; i++)
 {
-    public static void Main()
-    {
-        TestExpression("rgb.r * 1.1, rgb.g * 0.5, rgb.b * 0.8");
-        TestExpression("rgba.r, hsv.v, hsl.l");
-        TestExpression("hsv.hv.v");  // 测试嵌套访问
-        TestExpression("hsv.hs * 2.0 + hsva.a");
-    }
-
-    private static void TestExpression(string expression)
-    {
-        var grammar = new ColorExpressionParser.ColorFilterExpressionGrammar();
-        var parser = new Parser(grammar);
-
-        var parseTree = parser.Parse(expression);
-
-        Console.WriteLine(parseTree.Status);
-    }
+    imageProcessors.Add(new RgbFilterProcessor(2000, 2000, "rgba"));
 }
+
+foreach (var imageProcessor in imageProcessors)
+{
+    imageProcessor.Process(input.GetPixelSpan(), output.GetPixelSpan());
+}
+
+foreach (var imageProcessor in imageProcessors)
+{
+    imageProcessor.Dispose();
+}
+
+Console.ReadKey();
