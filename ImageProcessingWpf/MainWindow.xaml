@@ -3,10 +3,140 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ws="https://schemas.elecho.dev/wpfsuite"
         xmlns:local="clr-namespace:ImageProcessingWpf"
+        xmlns:ctrl="clr-namespace:ImageProcessingWpf.Controls"
+        xmlns:m="clr-namespace:ImageProcessingWpf.Models"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="MainWindow" Height="650" Width="860"
+        d:DataContext="{d:DesignInstance Type=local:MainWindow}"
+        Loaded="Window_Loaded">
+    <ws:DialogLayer>
+        <ws:DialogLayer.DialogTransition>
+            <ws:SlideFadeTransition Distance="50"
+                                    Orientation="Vertical"/>
+        </ws:DialogLayer.DialogTransition>
+        <ws:DialogLayer.MaskTransition>
+            <ws:FadeTransition/>
+        </ws:DialogLayer.MaskTransition>
+        <Grid>
+            <ws:Dialog IsOpen="{Binding IsCreateProcessorDialogVisible}"
+                       d:IsOpen="False">
+                <Border Background="White"
+                        CornerRadius="4"
+                        Padding="14">
+                    <DockPanel MinWidth="300">
+                        <TextBlock Text="Create Processor"
+                                   DockPanel.Dock="Top"
+                                   FontSize="14"/>
+                        <ws:StackPanel DockPanel.Dock="Bottom"
+                                       Margin="0 14 0 0"
+                                       HorizontalAlignment="Right"
+                                       Orientation="Horizontal"
+                                       Spacing="8">
+                            <ws:Button Content="OK"
+                                       Command="{Binding CommitCreateProcessorDialogCommand}"/>
+                            <ws:Button Content="Cancel"
+                                       Command="{Binding CloseCreateProcessorDialogCommand}"/>
+                        </ws:StackPanel>
+                        <ws:ListBox Margin="0 8 0 0"
+                                    ItemsSource="{x:Static m:ImageProcessorInfoCreation.All}"
+                                    SelectedItem="{Binding SelectedImageProcessorInfoCreation}"
+                                    CornerRadius="2"
+                                    Height="300">
+                            <ws:ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Description}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ws:ListBox.ItemTemplate>
+                        </ws:ListBox>
+                    </DockPanel>
+                </Border>
+            </ws:Dialog>
+            <DockPanel>
+                <ws:Menu DockPanel.Dock="Top">
+                    <ws:MenuItem Header="File">
+                        <ws:MenuItem Header="Open"
+                                     Command="{Binding OpenImageCommand}"/>
+                    </ws:MenuItem>
+                </ws:Menu>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <ctrl:MoveScaleHost Grid.Row="0"
+                                            ClipToBounds="True">
+                            <Image Source="{Binding DisplaySourceImage}"/>
+                        </ctrl:MoveScaleHost>
+                        <Rectangle Grid.Row="1"
+                                   Height="1"
+                                   Fill="#d6d6d6"/>
+                        <GridSplitter Grid.Row="1"
+                                      ResizeDirection="Rows"
+                                      Background="Transparent"/>
+                        <ctrl:MoveScaleHost Grid.Row="2"
+                                            ClipToBounds="True">
+                            <Image Source="{Binding DisplayProcessedImage}"/>
+                        </ctrl:MoveScaleHost>
+                    </Grid>
+                    <Rectangle Width="1"
+                               Grid.Column="1"
+                               Fill="#d6d6d6"/>
+                    <GridSplitter Grid.Column="1"
+                                  ResizeDirection="Columns"
+                                  Background="Transparent"/>
+                    <DockPanel Grid.Column="2">
+                        <Border DockPanel.Dock="Top"
+                                Background="#f5f5f5"
+                                BorderThickness="0 0 0 1"
+                                BorderBrush="#d6d6d6"
+                                Padding="4">
+                            <ws:BoxPanel>
+                                <TextBlock Text="Processors:"
+                                           VerticalAlignment="Center"/>
 
-    </Grid>
+                                <ws:Button HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Width="18"
+                                           Height="18"
+                                           Content="+"
+                                           Style="{StaticResource TextButton}"
+                                           Command="{Binding OpenCreateProcessorDialogCommand}"/>
+                            </ws:BoxPanel>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding ImageProcessorInfos}"
+                                      d:ItemsSource="{d:SampleData ItemCount=5}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ws:StackPanel Spacing="4"
+                                                   Margin="4"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ws:Expander>
+                                        <ws:Expander.Header>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </ws:Expander.Header>
+
+                                    </ws:Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Grid>
+            </DockPanel>
+        </Grid>
+    </ws:DialogLayer>
 </Window>

@@ -1,9 +1,36 @@
 ﻿<Application x:Class="ImageProcessingWpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ws="https://schemas.elecho.dev/wpfsuite"
              xmlns:local="clr-namespace:ImageProcessingWpf"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style TargetType="ws:Button">
+            <Setter Property="Padding" Value="8 4"/>
+            <Setter Property="CornerRadius" Value="3"/>
+        </Style>
+
+        <Style TargetType="ws:Button"
+               x:Key="TextButton">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style TargetType="ws:ScrollBar">
+            <Setter Property="IsButtonVisible" Value="False"/>
+
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="10"/>
+                    <Setter Property="MinWidth" Value="10"/>
+                </Trigger>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Height" Value="10"/>
+                    <Setter Property="MinHeight" Value="10"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Application.Resources>
 </Application>
