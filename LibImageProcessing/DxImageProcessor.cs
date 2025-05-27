@@ -16,8 +16,9 @@ namespace LibImageProcessing
 {
     public unsafe abstract class DxImageProcessor : IImageProcessor
     {
-        D3D11? _api;
-        D3DCompiler? _compiler;
+        private static D3D11? _api;
+        private static D3DCompiler? _compiler;
+        private static volatile int _instanceCount;
 
         ComPtr<ID3D11Device> _device;
         ComPtr<ID3D11DeviceContext> _deviceContext;
@@ -44,6 +45,7 @@ namespace LibImageProcessing
         public DxImageProcessor(
             int inputWidth, int inputHeight)
         {
+            _instanceCount++;
             _inputWidth = inputWidth;
             _inputHeight = inputHeight;
         }
@@ -57,23 +59,17 @@ namespace LibImageProcessing
         {
             if (_api is not null &&
                 _compiler is not null &&
-                _background is not null)
+                _background is not null &&
+                _device.Handle is not null &&
+                _deviceContext.Handle is not null)
             {
                 return;
             }
 
-            _api = D3D11.GetApi(null, false);
-            _compiler = D3DCompiler.GetApi();
+            _api ??= D3D11.GetApi(null, false);
+            _compiler ??= D3DCompiler.GetApi();
 
             _api.CreateDevice(ref Unsafe.NullRef<IDXGIAdapter>(), D3DDriverType.Hardware, 0, (uint)CreateDeviceFlag.Debug, ref Unsafe.NullRef<D3DFeatureLevel>(), 0, D3D11.SdkVersion, ref _device, null, ref _deviceContext);
-
-            //This is not supported under DXVK 
-            //TODO: PR a stub into DXVK for this maybe?
-            if (OperatingSystem.IsWindows())
-            {
-                // Log debug messages for this device (given that we've enabled the debug flag). Don't do this in release code!
-                _device.SetInfoQueueCallback(msg => Console.WriteLine(SilkMarshal.PtrToString((nint)msg.PDescription)));
-            }
 
             var renderTargetDesc = new Texture2DDesc()
             {
@@ -164,16 +160,18 @@ namespace LibImageProcessing
             fixed (byte* pShaderCode = shaderCodeBytes)
             {
                 ComPtr<ID3D10Blob> errorMsgs = null;
-                _compiler.Compile(pShaderCode, (nuint)(sizeof(char) * shaderCode.Length), "shader", ref Unsafe.NullRef<D3DShaderMacro>(), ref Unsafe.NullRef<ID3DInclude>(), "vs_main", "vs_5_0", 0, 0, ref _vertexShaderCode, ref errorMsgs);
+                _compiler.Compile(pShaderCode, (nuint)(shaderCodeBytes.Length), "shader", ref Unsafe.NullRef<D3DShaderMacro>(), ref Unsafe.NullRef<ID3DInclude>(), "vs_main", "vs_5_0", 0, 0, ref _vertexShaderCode, ref errorMsgs);
                 if (errorMsgs.Handle != null)
                 {
                     string error = Encoding.ASCII.GetString((byte*)errorMsgs.GetBufferPointer(), (int)errorMsgs.GetBufferSize());
+                    throw new InvalidOperationException(error);
                 }
 
-                _compiler.Compile(pShaderCode, (nuint)(sizeof(char) * shaderCode.Length), "shader", ref Unsafe.NullRef<D3DShaderMacro>(), ref Unsafe.NullRef<ID3DInclude>(), "ps_main", "ps_5_0", 0, 0, ref _pixelShaderCode, ref errorMsgs);
+                _compiler.Compile(pShaderCode, (nuint)(shaderCodeBytes.Length), "shader", ref Unsafe.NullRef<D3DShaderMacro>(), ref Unsafe.NullRef<ID3DInclude>(), "ps_main", "ps_5_0", 0, 0, ref _pixelShaderCode, ref errorMsgs);
                 if (errorMsgs.Handle != null)
                 {
                     string error = Encoding.ASCII.GetString((byte*)errorMsgs.GetBufferPointer(), (int)errorMsgs.GetBufferSize());
+                    throw new InvalidOperationException(error);
                 }
 
                 _device.CreateVertexShader(_vertexShaderCode.GetBufferPointer(), _vertexShaderCode.GetBufferSize(), ref Unsafe.NullRef<ID3D11ClassLinkage>(), ref _vertexShader);
@@ -324,14 +322,12 @@ namespace LibImageProcessing
         // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         ~DxImageProcessor()
         {
+            _instanceCount--;
             Dispose();
         }
 
         public void Dispose()
         {
-            _api?.Dispose();
-            _compiler?.Dispose();
-
             _device.DisposeIfNotNull();
             _deviceContext.DisposeIfNotNull();
             _renderTarget.DisposeIfNotNull();
@@ -343,6 +339,15 @@ namespace LibImageProcessing
             _vertexShader.DisposeIfNotNull();
             _pixelShader.DisposeIfNotNull();
             _inputLayout.DisposeIfNotNull();
+
+            if (_instanceCount == 0)
+            {
+                _api?.Dispose();
+                _compiler?.Dispose();
+
+                _api = null;
+                _compiler = null;
+            }
 
             GC.SuppressFinalize(this);
         }

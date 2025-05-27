@@ -19,4 +19,8 @@ foreach (var imageProcessor in imageProcessors)
     imageProcessor.Dispose();
 }
 
+input.Dispose();
+output.Dispose();
+
+Console.WriteLine("END");
 Console.ReadKey();
