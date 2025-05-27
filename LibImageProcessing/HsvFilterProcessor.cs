@@ -1,11 +1,16 @@
-﻿namespace LibImageProcessing
+﻿using LibImageProcessing.Helpers;
+
+namespace LibImageProcessing
 {
     public class HsvFilterProcessor : DxImageProcessor
     {
+        private readonly string _shaderColorExpression;
+
         public HsvFilterProcessor(int inputWidth, int inputHeight, string filter) : base(inputWidth, inputHeight)
         {
             ArgumentNullException.ThrowIfNull(filter);
 
+            _shaderColorExpression = ColorFilterExpressionParser.GetShaderExpressionForFilter(filter);
             Filter = filter;
         }
 
@@ -17,16 +22,6 @@
 
         protected internal override string GetShaderCode()
         {
-            var filterCompoments = Filter.Split(',');
-
-            var colorExpression = filterCompoments.Length switch
-            {
-                1 => $"float4({filterCompoments[0]}, {filterCompoments[0]}, {filterCompoments[0]}, 1.0)",
-                3 => $"float4({filterCompoments[0]}, {filterCompoments[1]}, {filterCompoments[2]}, 1.0)",
-                4 => $"float4({filterCompoments[0]}, {filterCompoments[1]}, {filterCompoments[2]}, {filterCompoments[3]})",
-                _ => "float4(0, 0, 0, 0)"
-            };
-
             return $$"""
                 Texture2D    _texture;
                 SamplerState _sampler;
@@ -158,7 +153,7 @@
                     return hsl;
                 }
                                 
-                float3 hsvToRgb(float3 hsv) {
+                float4 hsvaToRgba(float4 hsv) {
                     float h = hsv.x;
                     float s = hsv.y;
                     float v = hsv.z;
@@ -179,7 +174,7 @@
                     } else {
                         rgb = float3(c, 0, x);
                     }
-                    return rgb + float3(m, m, m);
+                    return float4(rgb + float3(m, m, m), hsv.z);
                 }
 
                 vs_out vs_main(vs_in input) 
@@ -201,7 +196,7 @@
                     float3 hsl = rgbToHsl(rgb);
                     float4 hsla = float4(hsl, rgba.w);
 
-                    return hsvToRgb({{colorExpression}});
+                    return hsvaToRgba({{_shaderColorExpression}});
                 }
                 """;
         }
