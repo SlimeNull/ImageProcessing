@@ -69,7 +69,11 @@ namespace LibImageProcessing
             _api ??= D3D11.GetApi(null, false);
             _compiler ??= D3DCompiler.GetApi();
 
-            _api.CreateDevice(ref Unsafe.NullRef<IDXGIAdapter>(), D3DDriverType.Hardware, 0, (uint)CreateDeviceFlag.Debug, ref Unsafe.NullRef<D3DFeatureLevel>(), 0, D3D11.SdkVersion, ref _device, null, ref _deviceContext);
+            int createDeviceError = _api.CreateDevice(ref Unsafe.NullRef<IDXGIAdapter>(), D3DDriverType.Hardware, 0, (uint)CreateDeviceFlag.Debug, ref Unsafe.NullRef<D3DFeatureLevel>(), 0, D3D11.SdkVersion, ref _device, null, ref _deviceContext);
+            if (createDeviceError != 0)
+            {
+                throw new InvalidOperationException("Failed to create device");
+            }
 
             var renderTargetDesc = new Texture2DDesc()
             {
