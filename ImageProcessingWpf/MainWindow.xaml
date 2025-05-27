@@ -66,9 +66,11 @@
                 <StatusBar DockPanel.Dock="Bottom">
                     <StatusBarItem>
                         <ProgressBar Width="100"
-                                     Height="16"/>
+                                     Height="16"
+                                     Value="{Binding ProgressCurrent}"
+                                     Maximum="{Binding ProgressTotal}"/>
                     </StatusBarItem>
-                    <StatusBarItem Content="qwq"/>
+                    <StatusBarItem Content="{Binding StatusText}"/>
                 </StatusBar>
                 <Grid>
                     <Grid.ColumnDefinitions>

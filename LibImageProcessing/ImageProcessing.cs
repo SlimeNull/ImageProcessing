@@ -34,7 +34,7 @@ namespace LibImageProcessing
             processor.Process(source.GetPixelSpan(), dest.GetPixelSpan());
         }
 
-        public static void Process(SKBitmap source, SKBitmap dest, IReadOnlyList<IImageProcessor> processors)
+        public static void Process(SKBitmap source, SKBitmap dest, IProgress<int> progress, IReadOnlyList<IImageProcessor> processors)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(dest);
@@ -145,6 +145,7 @@ namespace LibImageProcessing
                 }
 
                 processor.Process(currentInput.GetPixelSpan(), outputBuffer.GetPixelSpan());
+                progress?.Report(processorIndex + 1);
 
                 if (!isFirstProcessor)
                 {

@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ImageProcessingWpf.Extensions;
+using ImageProcessingWpf.Helpers;
 using ImageProcessingWpf.Models;
 using LibImageProcessing;
 using Microsoft.Win32;
@@ -28,6 +29,7 @@ namespace ImageProcessingWpf
     {
         private readonly SemaphoreSlim _semaphoreSlim = new(0);
         private readonly Thread _backgroundProcessThread;
+        private readonly IProgress<int> _processProgress;
 
         private readonly OpenFileDialog _openImageDialog = new OpenFileDialog()
         {
@@ -54,6 +56,18 @@ namespace ImageProcessingWpf
                 IsBackground = true,
             };
 
+            _processProgress = new DelegateProgress<int>(processed =>
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    ProgressCurrent = processed;
+                }
+                else
+                {
+                    Dispatcher.Invoke(() => ProgressCurrent = processed);
+                }
+            });
+
             DataContext = this;
             InitializeComponent();
         }
@@ -77,7 +91,7 @@ namespace ImageProcessingWpf
         private int _progressCurrent;
 
         [ObservableProperty]
-        private string _statusText;
+        private string _statusText = "Ready";
 
         public ObservableCollection<ImageProcessorInfo> ImageProcessorInfos { get; } = new();
 
@@ -135,7 +149,7 @@ namespace ImageProcessingWpf
 
             try
             {
-                ImageProcessing.Process(_sourceBitmap, _processedBitmap, imageProcessors);
+                ImageProcessing.Process(_sourceBitmap, _processedBitmap, _processProgress, imageProcessors);
 
                 Dispatcher.Invoke(() =>
                 {
