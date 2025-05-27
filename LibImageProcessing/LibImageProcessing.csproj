@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Irony" Version="1.5.3" />
 		<PackageReference Include="Silk.NET.Direct3D.Compilers" Version="2.22.0" />
 		<PackageReference Include="Silk.NET.Direct3D11" Version="2.22.0" />
 		<PackageReference Include="Silk.NET.DXGI" Version="2.22.0" />

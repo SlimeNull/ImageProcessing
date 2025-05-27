@@ -14,11 +14,8 @@ namespace LibImageProcessing
         public RgbFilterProcessor(int inputWidth, int inputHeight, string filter) : base(inputWidth, inputHeight)
         {
             ArgumentNullException.ThrowIfNull(filter);
-            if (!ShaderColorExpressionParser.GetShaderExpressionForFilter(filter, out _shaderColorExpression))
-            {
-                throw new ArgumentException(nameof(filter));
-            }
-            
+
+            _shaderColorExpression = ColorFilterExpressionParser.GetShaderExpressionForFilter(filter);
             Filter = filter;
         }
 

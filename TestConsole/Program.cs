@@ -1,12 +1,23 @@
-﻿// See https://aka.ms/new-console-template for more information
-using LibImageProcessing;
-using SkiaSharp;
+﻿// 示例使用
+using Irony.Parsing;
 
-Console.WriteLine("Hello, World!");
+public class Program
+{
+    public static void Main()
+    {
+        TestExpression("rgb.r * 1.1, rgb.g * 0.5, rgb.b * 0.8");
+        TestExpression("rgba.r, hsv.v, hsl.l");
+        TestExpression("hsv.hv.v");  // 测试嵌套访问
+        TestExpression("hsv.hs * 2.0 + hsva.a");
+    }
 
-var bitmap = SKBitmap.Decode(@"C:\Users\SlimeNull\OneDrive\Pictures\QQ图片20210512155144.jpg");
-var processor = new RgbFilterProcessor(bitmap.Width, bitmap.Height, "rgb.r");
-var result = ImageProcessing.Process(bitmap, processor);
+    private static void TestExpression(string expression)
+    {
+        var grammar = new ColorExpressionParser.ColorFilterExpressionGrammar();
+        var parser = new Parser(grammar);
 
-using var output = File.Create("output,png");
-result.Encode(output, SKEncodedImageFormat.Png, 100);
+        var parseTree = parser.Parse(expression);
+
+        Console.WriteLine(parseTree.Status);
+    }
+}

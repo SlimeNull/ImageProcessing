@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LibImageProcessing\LibImageProcessing.csproj" />
+	  <PackageReference Include="Irony" Version="1.5.3" />
   </ItemGroup>
 
 </Project>
