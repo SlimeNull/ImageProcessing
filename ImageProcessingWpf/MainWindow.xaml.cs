@@ -258,5 +258,10 @@ namespace ImageProcessingWpf
         {
             RequestProcess();
         }
+
+        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            CommitCreateProcessorDialog();
+        }
     }
 }

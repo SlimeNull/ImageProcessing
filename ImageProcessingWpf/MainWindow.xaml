@@ -42,6 +42,7 @@
                         <ws:ListBox Margin="0 8 0 0"
                                     ItemsSource="{x:Static m:ImageProcessorInfoCreation.All}"
                                     SelectedItem="{Binding SelectedImageProcessorInfoCreation}"
+                                    MouseDoubleClick="ListBox_MouseDoubleClick"
                                     CornerRadius="2"
                                     Height="300">
                             <ws:ListBox.ItemTemplate>
@@ -128,13 +129,22 @@
                                       d:ItemsSource="{d:SampleData ItemCount=5}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ws:StackPanel Spacing="4"
-                                                   Margin="4"/>
+                                    <ws:StackPanel Spacing="2"
+                                                   Margin="2"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <ws:Expander>
+                                    <ws:Expander
+                                        HeaderIconPosition="End"
+                                        HeaderPadding="4 4"
+                                        HeaderBorderThickness="1"
+                                        HeaderCornerRadius="4"
+                                        HeaderBackground="White"
+                                        HeaderBorderBrush="#e0e0e0"
+                                        HeaderCircleStroke="{x:Null}"
+                                        HeaderCircleHoverStroke="{x:Null}"
+                                        HeaderCirclePressedStroke="{x:Null}">
                                         <ws:Expander.Header>
                                             <TextBlock Text="{Binding Name}"/>
                                         </ws:Expander.Header>
@@ -143,7 +153,14 @@
                                                 <TextBox Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
                                             </DataTemplate>
                                         </ws:Expander.Resources>
-                                        <ContentControl Content="{Binding}"/>
+                                        <Border Margin="4 -2 4 0"
+                                                Padding="8"
+                                                BorderThickness="1"
+                                                BorderBrush="#e0e0e0"
+                                                CornerRadius="0 0 3 3"
+                                                Background="White">
+                                            <ContentControl Content="{Binding}"/>
+                                        </Border>
                                     </ws:Expander>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
