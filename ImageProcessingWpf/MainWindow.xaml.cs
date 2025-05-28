@@ -34,14 +34,14 @@ namespace ImageProcessingWpf
         private readonly OpenFileDialog _openImageDialog = new OpenFileDialog()
         {
             Title = "Open Image",
-            Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff|All Files|*.*",
+            Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All Files|*.*",
             CheckFileExists = true,
         };
 
         private readonly SaveFileDialog _saveImageDialog = new SaveFileDialog()
         {
             Title = "Save Image",
-            Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|TIFF Image|*.tiff|All Files|*.*",
+            Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*",
             CheckPathExists = true,
         };
 
@@ -231,6 +231,31 @@ namespace ImageProcessingWpf
                 _sourceBitmap.GetPixels(), _sourceBitmap.ByteCount, _sourceBitmap.RowBytes);
 
             RequestProcess();
+        }
+
+        [RelayCommand]
+        private void SaveImage()
+        {
+            if (_saveImageDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            var imageToSave = _processedBitmap ?? _sourceBitmap;
+            if (imageToSave is null)
+            {
+                return;
+            }
+
+            using var fileStream = System.IO.File.Create(_saveImageDialog.FileName);
+            imageToSave.Encode(fileStream, _saveImageDialog.FilterIndex switch
+            {
+                1 => SKEncodedImageFormat.Png,
+                2 => SKEncodedImageFormat.Jpeg,
+                3 => SKEncodedImageFormat.Bmp,
+                4 => SKEncodedImageFormat.Gif,
+                _ => SKEncodedImageFormat.Png,
+            }, 100);
         }
 
         [RelayCommand]

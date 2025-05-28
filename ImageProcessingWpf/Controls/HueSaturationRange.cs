@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace ImageProcessingWpf.Controls
 {
-    public record struct HsvRange(float HueMin, float SaturationMin, float ValueMin, float HueMax, float SaturationMax, float ValueMax);
+    public record struct HueSaturationRange(float HueMin, float SaturationMin, float HueMax, float SaturationMax);
 }

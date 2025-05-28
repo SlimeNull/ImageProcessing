@@ -6,7 +6,7 @@ namespace ImageProcessingWpf.Models
     public partial class HslFilterProcessorInfo : ImageProcessorInfo
     {
         [ObservableProperty]
-        private string _filter = "rgba";
+        private string _filter = "hsla";
 
         public override string Name => "HSL Filter";
 

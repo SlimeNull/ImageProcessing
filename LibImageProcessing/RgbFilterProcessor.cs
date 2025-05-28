@@ -15,7 +15,7 @@ namespace LibImageProcessing
         {
             ArgumentNullException.ThrowIfNull(filter);
 
-            _shaderColorExpression = ColorFilterExpressionParser.GetShaderExpressionForFilter(filter);
+            _shaderColorExpression = ColorFilterExpressionParser.GetShaderExpressionForRgbFilter(filter);
             Filter = filter;
         }
 

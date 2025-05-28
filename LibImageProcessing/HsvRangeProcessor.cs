@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using LibImageProcessing.Helpers;
+using SkiaSharp;
 
 namespace LibImageProcessing
 {
@@ -8,6 +9,7 @@ namespace LibImageProcessing
             int inputWidth, int inputHeight,
             float hueMin, float saturationMin, float valueMin, float alphaMin,
             float hueMax, float saturationMax, float valueMax, float alphaMax,
+            bool flipHueRange, bool flipSaturationRange, bool flipValueRange, bool flipAlphaRange,
             SKColor other) : base(inputWidth, inputHeight)
         {
             HueMin = hueMin;
@@ -18,6 +20,10 @@ namespace LibImageProcessing
             SaturationMax = saturationMax;
             ValueMax = valueMax;
             AlphaMax = alphaMax;
+            FlipHueRange = flipHueRange;
+            FlipSaturationRange = flipSaturationRange;
+            FlipValueRange = flipValueRange;
+            FlipAlphaRange = flipAlphaRange;
             Other = other;
         }
 
@@ -29,6 +35,10 @@ namespace LibImageProcessing
         public float SaturationMax { get; }
         public float ValueMax { get; }
         public float AlphaMax { get; }
+        public bool FlipHueRange { get; }
+        public bool FlipSaturationRange { get; }
+        public bool FlipValueRange { get; }
+        public bool FlipAlphaRange { get; }
         public SKColor Other { get; }
 
         public override int OutputWidth => InputWidth;
@@ -36,6 +46,36 @@ namespace LibImageProcessing
 
         protected internal override string GetShaderCode()
         {
+            string
+                hueOp1 = "<",
+                hueOp2 = ">",
+                saturationOp1 = "<",
+                saturationOp2 = ">",
+                valueOp1 = "<",
+                valueOp2 = ">",
+                alphaOp1 = "<",
+                alphaOp2 = ">";
+
+            if (FlipHueRange)
+            {
+                (hueOp1, hueOp2) = (">", "<");
+            }
+
+            if (FlipSaturationRange)
+            {
+                (saturationOp1, saturationOp2) = (">", "<");
+            }
+
+            if (FlipValueRange)
+            {
+                (valueOp1, valueOp2) = (">", "<");
+            }
+
+            if (FlipAlphaRange)
+            {
+                (alphaOp1, alphaOp2) = (">", "<");
+            }
+
             return $$"""
                 Texture2D    _texture;
                 SamplerState _sampler;
@@ -49,61 +89,8 @@ namespace LibImageProcessing
                 {
                     float4 position : SV_POSITION;
                 };
-                
-                float3 rgbToHsv(float3 rgb)
-                {
-                    float3 hsv = float3(0.0, 0.0, 0.0);
-                
-                    float r = rgb.r;
-                    float g = rgb.g;
-                    float b = rgb.b;
-                
-                    float maxVal = max(r, max(g, b));
-                    float minVal = min(r, min(g, b));
-                    float delta = maxVal - minVal;
-                
-                    // Calculate Value (V)
-                    hsv.z = maxVal;
-                
-                    // Calculate Saturation (S)
-                    if (maxVal > 0)
-                    {
-                        hsv.y = delta / maxVal;
-                    }
-                    else
-                    {
-                        hsv.y = 0.0;
-                    }
-                
-                    // Calculate Hue (H)
-                    if (delta > 0)
-                    {
-                        if (maxVal == r)
-                        {
-                            hsv.x = (g - b) / delta;
-                        }
-                        else if (maxVal == g)
-                        {
-                            hsv.x = 2.0 + (b - r) / delta;
-                        }
-                        else
-                        {
-                            hsv.x = 4.0 + (r - g) / delta;
-                        }
-                
-                        hsv.x *= 60.0;
-                        if (hsv.x < 0.0)
-                        {
-                            hsv.x += 360.0;
-                        }
-                    }
-                    else
-                    {
-                        hsv.x = 0.0;
-                    }
-                
-                    return hsv;
-                }
+
+                {{HlslCommonFunctions.RgbToHsv()}}
 
                 vs_out vs_main(vs_in input) 
                 {
@@ -120,10 +107,10 @@ namespace LibImageProcessing
                     float4 rgba = _texture.Sample(_sampler, float2(input.position.x / {{InputWidth}}, input.position.y / {{InputHeight}}));
                     float4 hsva = float4(rgbToHsv(rgba.xyz), rgba.w);
 
-                    if (hsva.x < {{HueMin}} || hsva.x > {{HueMax}} ||
-                        hsva.y < {{SaturationMin}} || hsva.y > {{SaturationMax}} ||
-                        hsva.z < {{ValueMin}} || hsva.z > {{ValueMax}} ||
-                        hsva.w < {{AlphaMin}} || hsva.w > {{AlphaMax}})
+                    if (hsva.x {{hueOp1}} {{HueMin}} || hsva.x {{hueOp2}} {{HueMax}} ||
+                        hsva.y {{saturationOp1}} {{SaturationMin}} || hsva.y {{saturationOp2}} {{SaturationMax}} ||
+                        hsva.z {{valueOp1}} {{ValueMin}} || hsva.z {{valueOp2}} {{ValueMax}} ||
+                        hsva.w {{alphaOp1}} {{AlphaMin}} || hsva.w {{alphaOp2}} {{AlphaMax}})
                     {
                         return float4({{Other.Red / 255.0f}}, {{Other.Green / 255.0f}}, {{Other.Blue / 255.0f}}, rgba.w);
                     }

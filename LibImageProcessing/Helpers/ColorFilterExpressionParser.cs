@@ -21,7 +21,7 @@ namespace LibImageProcessing.Helpers
             s_parser = new Parser(s_grammar);
         }
 
-        private record struct ValueNodeInfo(string Text, int Components);
+        public record struct ValueNodeInfo(string Text, int Components);
 
         private static IEnumerable<string> RepeatString(string value, int count)
         {
@@ -188,7 +188,9 @@ namespace LibImageProcessing.Helpers
             return new ValueNodeInfo(shaderCode, components);
         }
 
-        public static string GetShaderExpression(string expression, IVectorVariable[] availableVariables)
+        public delegate string ShaderExpressionDefaultComponentResolver(ValueNodeInfo[] Values, int RequiredComponentIndex);
+
+        public static string GetShaderExpression(string expression, IVectorVariable[] availableVariables, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
         {
             var parseTree = s_parser.Parse(expression);
             if (parseTree.HasErrors())
@@ -207,9 +209,9 @@ namespace LibImageProcessing.Helpers
                 var onePart = nodeInfos[0];
                 return onePart.Components switch
                 {
-                    1 => $"float4({onePart.Text}, {onePart.Text}, {onePart.Text}, 1)",
-                    2 => $"float4({onePart.Text}, 1, 1)",
-                    3 => $"float4({onePart.Text}, 1)",
+                    1 => $"float4({onePart.Text}, {defaultComponentResolver.Invoke(nodeInfos, 1)}, {defaultComponentResolver.Invoke(nodeInfos, 2)}, {defaultComponentResolver.Invoke(nodeInfos, 3)})",
+                    2 => $"float4({onePart.Text}, {defaultComponentResolver.Invoke(nodeInfos, 2)}, {defaultComponentResolver.Invoke(nodeInfos, 3)})",
+                    3 => $"float4({onePart.Text}, {defaultComponentResolver.Invoke(nodeInfos, 3)})",
                     4 => $"{onePart.Text}",
                     _ => throw new ArgumentException("Invalid expression")
                 };
@@ -228,11 +230,14 @@ namespace LibImageProcessing.Helpers
                     totalComponents += part.Components;
                 }
 
-                return $"float4({string.Join(", ", nodeInfos.Select(part => part.Text))}, {string.Join(", ", RepeatString("1", 4 - totalComponents))}";
+                var componentsToFill = Enumerable.Range(totalComponents, 4 - totalComponents)
+                    .Select(requiredComponentIndex => defaultComponentResolver.Invoke(nodeInfos, requiredComponentIndex));
+
+                return $"float4({string.Join(", ", nodeInfos.Select(part => part.Text))}, {string.Join(", ", componentsToFill)})";
             }
         }
 
-        public static string GetShaderExpressionForFilter(string expression)
+        public static string GetShaderExpressionForFilter(string expression, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
         {
             IVectorVariable[] vectorVariables =
             [
@@ -244,7 +249,49 @@ namespace LibImageProcessing.Helpers
                 new VectorVariable("hsla", "hsla", 4, ['h', 's', 'l', 'a']),
             ];
 
-            return GetShaderExpression(expression, vectorVariables);
+            return GetShaderExpression(expression, vectorVariables, defaultComponentResolver);
+        }
+
+        public static string GetShaderExpressionForRgbFilter(string expression)
+        {
+            return GetShaderExpressionForFilter(expression, (componentsExists, requiredComponentIndex) =>
+            {
+                if (componentsExists.Length == 1 &&
+                    componentsExists[0].Components == 1)
+                {
+                    return componentsExists[0].Text;
+                }
+
+                return "1";
+            });
+        }
+
+        public static string GetShaderExpressionForHsvFilter(string expression)
+        {
+            return GetShaderExpressionForFilter(expression, (componentsExists, requiredComponentIndex) =>
+            {
+                return requiredComponentIndex switch
+                {
+                    1 => "1",
+                    2 => "1",
+                    3 => "1",
+                    _ => "0"
+                };
+            });
+        }
+
+        public static string GetShaderExpressionForHslFilter(string expression)
+        {
+            return GetShaderExpressionForFilter(expression, (componentsExists, requiredComponentIndex) =>
+            {
+                return requiredComponentIndex switch
+                {
+                    1 => "1",
+                    2 => "0.5",
+                    3 => "1",
+                    _ => "0"
+                };
+            });
         }
     }
 }

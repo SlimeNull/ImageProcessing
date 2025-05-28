@@ -6,8 +6,15 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <Style TargetType="ws:Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#e0e0e0"/>
+            <Setter Property="HoverBackground" Value="#11000000"/>
+            <Setter Property="HoverBorderBrush" Value="#11000000"/>
+            <Setter Property="PressedBackground" Value="#22000000"/>
+            <Setter Property="PressedBorderBrush" Value="#22000000"/>
             <Setter Property="Padding" Value="8 4"/>
-            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         </Style>
 
         <Style TargetType="ws:Button"
@@ -16,6 +23,58 @@
             <Setter Property="CornerRadius" Value="3"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style TargetType="ws:TextBox">
+            <Setter Property="Padding" Value="4 3"/>
+            <Setter Property="CornerRadius" Value="2"/>
+        </Style>
+
+        <Style TargetType="ws:ContextMenu">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#e0e0e0"/>
+            <Setter Property="FontFamily" Value="{StaticResource FontDingDing}"/>
+
+            <Setter Property="TransitionMode" Value="ChangedOrLoaded"/>
+            <Setter Property="Transition">
+                <Setter.Value>
+                    <ws:SlideFadeTransition Orientation="Vertical"
+                                            Reverse="True"
+                                            Distance="10"
+                                            Duration="0:0:0.300"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ws:MenuItem">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6 8"/>
+
+            <Setter Property="HighlightedBackground" Value="#10000000"/>
+
+            <Setter Property="PopupCornerRadius" Value="6"/>
+            <Setter Property="PopupBackground" Value="White"/>
+            <Setter Property="PopupBorderBrush" Value="#e0e0e0"/>
+
+            <Setter Property="PopupContentTransitionMode" Value="ChangedOrLoaded"/>
+            <Setter Property="PopupContentTransition">
+                <Setter.Value>
+                    <ws:SlideFadeTransition Orientation="Vertical"
+                                            Reverse="True"
+                                            Distance="10"
+                                            Duration="0:0:0.300"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ws:ListBox">
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+
+        <Style TargetType="ws:ListBoxItem">
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
 
         <Style TargetType="ws:ScrollBar">

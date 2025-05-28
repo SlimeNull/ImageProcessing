@@ -8,27 +8,25 @@ namespace ImageProcessingWpf.Models
     public partial class HsvRangeProcessorInfo : ImageProcessorInfo
     {
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
         private float _hueMin = 0f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
         private float _hueMax = 1f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
         private float _saturationMin = 0f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
         private float _saturationMax = 1f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
         private float _valueMin = 0f;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ColorRange))]
         private float _valueMax = 1f;
 
         [ObservableProperty]
@@ -40,7 +38,22 @@ namespace ImageProcessingWpf.Models
         [ObservableProperty]
         private Color _otherColor = Colors.Transparent;
 
-        public HsvRange ColorRange => new HsvRange(HueMin, SaturationMin, ValueMin, HueMax, SaturationMax, ValueMax);
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
+        private bool _flipHueRange;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HueSaturationRange))]
+        private bool _flipSaturationRange;
+
+        [ObservableProperty]
+        private bool _flipValueRange;
+
+        [ObservableProperty]
+        private bool _flipAlphaRange;
+
+
+        public HueSaturationRange HueSaturationRange => new HueSaturationRange(HueMin, SaturationMin, HueMax, SaturationMax);
 
         public override string Name => "HSV Range";
 
@@ -48,7 +61,8 @@ namespace ImageProcessingWpf.Models
         {
             return new HsvRangeProcessor(
                 inputWidth, inputHeight,
-                HueMin * 360, SaturationMin, ValueMin, AlphaMin, HueMax * 360, SaturationMax, ValueMax, AlphaMax,
+                HueMin, SaturationMin, ValueMin, AlphaMin, HueMax, SaturationMax, ValueMax, AlphaMax,
+                FlipHueRange, FlipSaturationRange, FlipValueRange, FlipAlphaRange,
                 new SkiaSharp.SKColor(OtherColor.R, OtherColor.G, OtherColor.B, OtherColor.A));
         }
     }

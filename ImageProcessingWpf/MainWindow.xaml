@@ -43,6 +43,7 @@
                                        Command="{Binding CloseCreateProcessorDialogCommand}"/>
                         </ws:StackPanel>
                         <ws:ListBox Margin="0 8 0 0"
+                                    Padding="2"
                                     ItemsSource="{x:Static m:ImageProcessorInfoCreation.All}"
                                     SelectedItem="{Binding SelectedImageProcessorInfoCreation}"
                                     MouseDoubleClick="ListBox_MouseDoubleClick"
@@ -65,6 +66,8 @@
                     <ws:MenuItem Header="File">
                         <ws:MenuItem Header="Open"
                                      Command="{Binding OpenImageCommand}"/>
+                        <ws:MenuItem Header="Save"
+                                     Command="{Binding SaveImageCommand}"/>
                     </ws:MenuItem>
                 </ws:Menu>
                 <StatusBar DockPanel.Dock="Bottom">
@@ -151,17 +154,17 @@
                                             <ws:BindingProxy x:Key="DataProxy" Data="{Binding}"/>
                                         </ws:Expander.Resources>
                                         <ws:Expander.ContextMenu>
-                                            <ContextMenu>
-                                                <MenuItem Header="Move Up"
-                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToPrevCommand}"
-                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
-                                                <MenuItem Header="Move Down"
-                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToNextCommand}"
-                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
-                                                <MenuItem Header="Remove"
-                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.RemoveProcessorCommand}"
-                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
-                                            </ContextMenu>
+                                            <ws:ContextMenu>
+                                                <ws:MenuItem Header="Move Up"
+                                                             Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToPrevCommand}"
+                                                             CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                                <ws:MenuItem Header="Move Down"
+                                                             Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToNextCommand}"
+                                                             CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                                <ws:MenuItem Header="Remove"
+                                                             Command="{Binding Source={StaticResource RootDataProxy},Path=Data.RemoveProcessorCommand}"
+                                                             CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                            </ws:ContextMenu>
                                         </ws:Expander.ContextMenu>
                                         <ws:Expander.Header>
                                             <TextBlock Text="{Binding Name}"/>
@@ -175,16 +178,38 @@
                                             <ContentControl Content="{Binding}">
                                                 <ContentControl.Resources>
                                                     <DataTemplate DataType="{x:Type m:RgbFilterProcessorInfo}">
-                                                        <TextBox Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock Text="Expression: "
+                                                                       VerticalAlignment="Center"/>
+                                                            <ws:TextBox Margin="0 4 0 0"
+                                                                        Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                    <DataTemplate DataType="{x:Type m:HsvFilterProcessorInfo}">
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock Text="Expression: "
+                                                                       VerticalAlignment="Center"/>
+                                                            <ws:TextBox Margin="0 4 0 0"
+                                                                        Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                    <DataTemplate DataType="{x:Type m:HslFilterProcessorInfo}">
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock Text="Expression: "
+                                                                       VerticalAlignment="Center"/>
+                                                            <ws:TextBox Margin="0 4 0 0"
+                                                                        Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                     <DataTemplate DataType="{x:Type m:HsvRangeProcessorInfo}">
                                                         <StackPanel>
-                                                            <ctrl:HsvRangeIndicator MinWidth="100"
-                                                                                    MinHeight="100"
-                                                                                    HorizontalAlignment="Left"
-                                                                                    Range="{Binding ColorRange}"/>
+                                                            <ctrl:HueSaturationIndicator
+                                                                MinWidth="100"
+                                                                MinHeight="100"
+                                                                HorizontalAlignment="Left"
+                                                                Range="{Binding HueSaturationRange}"/>
 
-                                                            <Grid>
+                                                            <Grid Margin="0 8 0 0">
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                     <ColumnDefinition Width="4"/>
@@ -203,6 +228,7 @@
                                                                 </ws:UniformGrid>
                                                                 <ws:UniformGrid Columns="1"
                                                                                 Grid.Column="2"
+                                                                                VerticalSpacing="2"
                                                                                 MinWidth="100">
                                                                     <Slider Minimum="0" Maximum="1" Value="{Binding HueMin}"/>
                                                                     <Slider Minimum="0" Maximum="1" Value="{Binding HueMax}"/>
