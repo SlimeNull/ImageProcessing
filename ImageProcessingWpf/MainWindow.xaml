@@ -11,6 +11,9 @@
         Title="MainWindow" Height="650" Width="860"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Loaded="Window_Loaded">
+    <Window.Resources>
+        <ws:BindingProxy x:Key="RootDataProxy" Data="{Binding}"/>
+    </Window.Resources>
     <ws:DialogLayer>
         <ws:DialogLayer.DialogTransition>
             <ws:SlideFadeTransition Distance="50"
@@ -144,60 +147,77 @@
                                                  HeaderCircleStroke="{x:Null}"
                                                  HeaderCircleHoverStroke="{x:Null}"
                                                  HeaderCirclePressedStroke="{x:Null}">
+                                        <ws:Expander.Resources>
+                                            <ws:BindingProxy x:Key="DataProxy" Data="{Binding}"/>
+                                        </ws:Expander.Resources>
+                                        <ws:Expander.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Move Up"
+                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToPrevCommand}"
+                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                                <MenuItem Header="Move Down"
+                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.MoveProcessorToNextCommand}"
+                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                                <MenuItem Header="Remove"
+                                                          Command="{Binding Source={StaticResource RootDataProxy},Path=Data.RemoveProcessorCommand}"
+                                                          CommandParameter="{Binding Source={StaticResource DataProxy},Path=Data}"/>
+                                            </ContextMenu>
+                                        </ws:Expander.ContextMenu>
                                         <ws:Expander.Header>
                                             <TextBlock Text="{Binding Name}"/>
                                         </ws:Expander.Header>
-                                        <ws:Expander.Resources>
-                                            <DataTemplate DataType="{x:Type m:RgbFilterProcessorInfo}">
-                                                <TextBox Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
-                                            </DataTemplate>
-                                            <DataTemplate DataType="{x:Type m:HsvRangeProcessorInfo}">
-                                                <StackPanel>
-                                                    <ctrl:HsvRangeIndicator MinWidth="100"
-                                                                            MinHeight="100"
-                                                                            HorizontalAlignment="Left"
-                                                                            Range="{Binding ColorRange}"/>
-
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="4"/>
-                                                            <ColumnDefinition/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <ws:UniformGrid Columns="1"
-                                                                        Grid.Column="0">
-                                                            <TextBlock Text="H Min"/>
-                                                            <TextBlock Text="H Max"/>
-                                                            <TextBlock Text="S Min"/>
-                                                            <TextBlock Text="S Max"/>
-                                                            <TextBlock Text="V Min"/>
-                                                            <TextBlock Text="V Max"/>
-                                                            <TextBlock Text="A Min"/>
-                                                            <TextBlock Text="A Max"/>
-                                                        </ws:UniformGrid>
-                                                        <ws:UniformGrid Columns="1"
-                                                                        Grid.Column="2"
-                                                                        MinWidth="100">
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding HueMin}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding HueMax}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding SaturationMin}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding SaturationMax}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding ValueMin}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding ValueMax}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding AlphaMin}"/>
-                                                            <Slider Minimum="0" Maximum="1" Value="{Binding AlphaMax}"/>
-                                                        </ws:UniformGrid>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ws:Expander.Resources>
                                         <Border Margin="4 -2 4 0"
                                                 Padding="8"
                                                 BorderThickness="1"
                                                 BorderBrush="#e0e0e0"
                                                 CornerRadius="0 0 3 3"
                                                 Background="White">
-                                            <ContentControl Content="{Binding}"/>
+                                            <ContentControl Content="{Binding}">
+                                                <ContentControl.Resources>
+                                                    <DataTemplate DataType="{x:Type m:RgbFilterProcessorInfo}">
+                                                        <TextBox Text="{Binding Filter,UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </DataTemplate>
+                                                    <DataTemplate DataType="{x:Type m:HsvRangeProcessorInfo}">
+                                                        <StackPanel>
+                                                            <ctrl:HsvRangeIndicator MinWidth="100"
+                                                                                    MinHeight="100"
+                                                                                    HorizontalAlignment="Left"
+                                                                                    Range="{Binding ColorRange}"/>
+
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="4"/>
+                                                                    <ColumnDefinition/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <ws:UniformGrid Columns="1"
+                                                                                Grid.Column="0">
+                                                                    <TextBlock Text="H Min"/>
+                                                                    <TextBlock Text="H Max"/>
+                                                                    <TextBlock Text="S Min"/>
+                                                                    <TextBlock Text="S Max"/>
+                                                                    <TextBlock Text="V Min"/>
+                                                                    <TextBlock Text="V Max"/>
+                                                                    <TextBlock Text="A Min"/>
+                                                                    <TextBlock Text="A Max"/>
+                                                                </ws:UniformGrid>
+                                                                <ws:UniformGrid Columns="1"
+                                                                                Grid.Column="2"
+                                                                                MinWidth="100">
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding HueMin}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding HueMax}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding SaturationMin}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding SaturationMax}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding ValueMin}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding ValueMax}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding AlphaMin}"/>
+                                                                    <Slider Minimum="0" Maximum="1" Value="{Binding AlphaMax}"/>
+                                                                </ws:UniformGrid>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ContentControl.Resources>
+                                            </ContentControl>
                                         </Border>
                                     </ws:Expander>
                                 </DataTemplate>

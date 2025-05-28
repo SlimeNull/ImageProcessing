@@ -22,6 +22,8 @@
         public static IReadOnlyList<ImageProcessorInfoCreation> All { get; } =
         [
             new ImageProcessorInfoCreation("RGB Filter", "fjaowiejfioawjegoie", () => new RgbFilterProcessorInfo()),
+            new ImageProcessorInfoCreation("HSV Filter", "fjaowiejfioawjegoie", () => new HsvFilterProcessorInfo()),
+            new ImageProcessorInfoCreation("HSL Filter", "fjaowiejfioawjegoie", () => new HslFilterProcessorInfo()),
             new ImageProcessorInfoCreation("HSV Range", "fjaowiejfioweof", () => new HsvRangeProcessorInfo()),
         ];
     }

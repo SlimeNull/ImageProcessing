@@ -35,147 +35,12 @@ namespace LibImageProcessing
                 {
                     float4 position : SV_POSITION;
                 };
-                
-                float3 rgbToHsv(float3 rgb)
-                {
-                    float3 hsv = float3(0.0, 0.0, 0.0);
-                
-                    float r = rgb.r;
-                    float g = rgb.g;
-                    float b = rgb.b;
-                
-                    float maxVal = max(r, max(g, b));
-                    float minVal = min(r, min(g, b));
-                    float delta = maxVal - minVal;
-                
-                    // Calculate Value (V)
-                    hsv.z = maxVal;
-                
-                    // Calculate Saturation (S)
-                    if (maxVal > 0)
-                    {
-                        hsv.y = delta / maxVal;
-                    }
-                    else
-                    {
-                        hsv.y = 0.0;
-                    }
-                
-                    // Calculate Hue (H)
-                    if (delta > 0)
-                    {
-                        if (maxVal == r)
-                        {
-                            hsv.x = (g - b) / delta;
-                        }
-                        else if (maxVal == g)
-                        {
-                            hsv.x = 2.0 + (b - r) / delta;
-                        }
-                        else
-                        {
-                            hsv.x = 4.0 + (r - g) / delta;
-                        }
-                
-                        hsv.x *= 60.0;
-                        if (hsv.x < 0.0)
-                        {
-                            hsv.x += 360.0;
-                        }
-                    }
-                    else
-                    {
-                        hsv.x = 0.0;
-                    }
-                
-                    return hsv;
-                }
-                
-                float3 rgbToHsl(float3 rgb)
-                {
-                    float3 hsl = float3(0.0, 0.0, 0.0);
-                
-                    float r = rgb.r;
-                    float g = rgb.g;
-                    float b = rgb.b;
-                
-                    float maxVal = max(r, max(g, b));
-                    float minVal = min(r, min(g, b));
-                    float delta = maxVal - minVal;
-                
-                    // Calculate Lightness (L)
-                    hsl.z = (maxVal + minVal) * 0.5;
-                
-                    // Calculate Saturation (S)
-                    if (delta > 0)
-                    {
-                        if (hsl.z < 0.5)
-                        {
-                            hsl.y = delta / (maxVal + minVal);
-                        }
-                        else
-                        {
-                            hsl.y = delta / (2.0 - maxVal - minVal);
-                        }
-                    }
-                    else
-                    {
-                        hsl.y = 0.0;
-                    }
-                
-                    // Calculate Hue (H)
-                    if (delta > 0)
-                    {
-                        if (maxVal == r)
-                        {
-                            hsl.x = (g - b) / delta;
-                        }
-                        else if (maxVal == g)
-                        {
-                            hsl.x = 2.0 + (b - r) / delta;
-                        }
-                        else
-                        {
-                            hsl.x = 4.0 + (r - g) / delta;
-                        }
-                
-                        hsl.x *= 60.0;
-                        if (hsl.x < 0.0)
-                        {
-                            hsl.x += 360.0;
-                        }
-                    }
-                    else
-                    {
-                        hsl.x = 0.0;
-                    }
-                
-                    return hsl;
-                }
-                                
-                float4 hsvaToRgba(float4 hsv) {
-                    float h = hsv.x;
-                    float s = hsv.y;
-                    float v = hsv.z;
-                    float c = v * s; // 色彩强度
-                    float x = c * (1 - abs(fmod(h * 6.0, 2.0) - 1));
-                    float m = v - c;
-                    float3 rgb = float3(0, 0, 0);
-                    if (h < 1.0 / 6.0) {
-                        rgb = float3(c, x, 0);
-                    } else if (h < 2.0 / 6.0) {
-                        rgb = float3(x, c, 0);
-                    } else if (h < 3.0 / 6.0) {
-                        rgb = float3(0, c, x);
-                    } else if (h < 4.0 / 6.0) {
-                        rgb = float3(0, x, c);
-                    } else if (h < 5.0 / 6.0) {
-                        rgb = float3(x, 0, c);
-                    } else {
-                        rgb = float3(c, 0, x);
-                    }
-                    return float4(rgb + float3(m, m, m), hsv.z);
-                }
+
+                {{HlslCommonFunctions.RgbToHsv()}}
+
+                {{HlslCommonFunctions.RgbToHsl()}}
+
+                {{HlslCommonFunctions.HsvToRgb()}}
 
                 vs_out vs_main(vs_in input) 
                 {
@@ -196,7 +61,10 @@ namespace LibImageProcessing
                     float3 hsl = rgbToHsl(rgb);
                     float4 hsla = float4(hsl, rgba.w);
 
-                    return hsvaToRgba({{_shaderColorExpression}});
+                    float4 finalHsva = {{_shaderColorExpression}};
+                    float3 finalRgb = hsvToRgb(finalHsva.xyz);
+
+                    return float4(finalRgb, finalHsva.w);
                 }
                 """;
         }

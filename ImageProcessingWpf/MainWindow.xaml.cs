@@ -270,5 +270,55 @@ namespace ImageProcessingWpf
         {
             CommitCreateProcessorDialog();
         }
+
+        [RelayCommand]
+        private void RemoveProcessor(ImageProcessorInfo? imageProcessorInfo)
+        {
+            if (imageProcessorInfo is null)
+            {
+                return;
+            }
+
+            ImageProcessorInfos.Remove(imageProcessorInfo);
+            RequestProcess();
+        }
+
+        [RelayCommand]
+        private void MoveProcessorToPrev(ImageProcessorInfo? imageProcessorInfo)
+        {
+            if (imageProcessorInfo is null)
+            {
+                return;
+            }
+
+            int index = ImageProcessorInfos.IndexOf(imageProcessorInfo);
+            int indexPrev = index - 1;
+
+            if (index != -1 &&
+                indexPrev >= 0)
+            {
+                ImageProcessorInfos.Swap(index, indexPrev);
+                RequestProcess();
+            }
+        }
+
+        [RelayCommand]
+        private void MoveProcessorToNext(ImageProcessorInfo? imageProcessorInfo)
+        {
+            if (imageProcessorInfo is null)
+            {
+                return;
+            }
+
+            int index = ImageProcessorInfos.IndexOf(imageProcessorInfo);
+            int indexNext = index + 1;
+
+            if (index != -1 &&
+                indexNext < ImageProcessorInfos.Count)
+            {
+                ImageProcessorInfos.Swap(index, indexNext);
+                RequestProcess();
+            }
+        }
     }
 }
