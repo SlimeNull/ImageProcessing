@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ws="https://schemas.elecho.dev/wpfsuite"
         xmlns:local="clr-namespace:ImageProcessingWpf"
+        xmlns:libp="clr-namespace:LibImageProcessing;assembly=LibImageProcessing"
         xmlns:ctrl="clr-namespace:ImageProcessingWpf.Controls"
+        xmlns:mk="clr-namespace:ImageProcessingWpf.MarkupExtensions"
         xmlns:m="clr-namespace:ImageProcessingWpf.Models"
         mc:Ignorable="d"
         Title="Image Processor!" Height="650" Width="860"
@@ -253,6 +255,12 @@
                                                             <ws:TextBox Margin="4 0 0 0"
                                                                         Grid.Column="1"
                                                                         Text="{Binding BlurSize,FallbackValue=0,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                    <DataTemplate DataType="{x:Type m:GrayscaleProcessorInfo}">
+                                                        <Grid>
+                                                            <ws:ComboBox ItemsSource="{mk:EnumValues Type=libp:GrayscaleMethod}"
+                                                                         SelectedItem="{Binding Method}"/>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ContentControl.Resources>

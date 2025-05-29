@@ -50,9 +50,6 @@ namespace LibImageProcessing.Helpers
                 RegisterOperators(1, "+", "-");
                 RegisterOperators(2, "*", "/");
 
-                // 标记标点符号
-                MarkPunctuation("(", ")", ".", ",");
-
                 // 设置注释等
                 LanguageFlags = LanguageFlags.Default;
             }

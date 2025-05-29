@@ -42,7 +42,7 @@ namespace LibImageProcessing.Helpers
                     case [var expression]:
                         yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
                         yield break;
-                    case [var expressionList, var expression]:
+                    case [var expressionList, _, var expression]:
                         foreach (var before in ExpressionListNodeInfo(expressionList, availableVariables, availableFunctions))
                         {
                             yield return before;
@@ -64,7 +64,7 @@ namespace LibImageProcessing.Helpers
                     case [var expression]:
                         yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
                         yield break;
-                    case [var expressionList, var expression]:
+                    case [var expressionList, _, var expression]:
                         foreach (var before in ArgumentListNodeInfo(expressionList, availableVariables, availableFunctions))
                         {
                             yield return before;
@@ -175,7 +175,7 @@ namespace LibImageProcessing.Helpers
                         accessSequence.Add(identifier.Token.Text);
                         nextNode = null;
                         break;
-                    case [var memberAccess, var identifier]:
+                    case [var memberAccess, _, var identifier]:
                         accessSequence.Add(identifier.Token.Text);
                         nextNode = memberAccess;
                         break;
@@ -293,10 +293,17 @@ namespace LibImageProcessing.Helpers
                     totalComponents += part.Components;
                 }
 
-                var componentsToFill = Enumerable.Range(totalComponents, 4 - totalComponents)
-                    .Select(requiredComponentIndex => defaultComponentResolver.Invoke(nodeInfos, requiredComponentIndex));
+                if (totalComponents < 4)
+                {
+                    var componentsToFill = Enumerable.Range(totalComponents, 4 - totalComponents)
+                        .Select(requiredComponentIndex => defaultComponentResolver.Invoke(nodeInfos, requiredComponentIndex));
 
-                return $"float4({string.Join(", ", nodeInfos.Select(part => part.Text))}, {string.Join(", ", componentsToFill)})";
+                    return $"float4({string.Join(", ", nodeInfos.Select(part => part.Text))}, {string.Join(", ", componentsToFill)})";
+                }
+                else
+                {
+                    return $"float4({string.Join(", ", nodeInfos.Select(part => part.Text))})";
+                }
             }
         }
 
