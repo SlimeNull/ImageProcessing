@@ -242,6 +242,19 @@
                                                             </Grid>
                                                         </StackPanel>
                                                     </DataTemplate>
+                                                    <DataTemplate DataType="{x:Type m:BoxBlurProcessorInfo}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="Blur Size: "
+                                                                       VerticalAlignment="Center"/>
+                                                            <ws:TextBox Margin="4 0 0 0"
+                                                                        Grid.Column="1"
+                                                                        Text="{Binding BlurSize,FallbackValue=0,UpdateSourceTrigger=PropertyChanged}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
                                                 </ContentControl.Resources>
                                             </ContentControl>
                                         </Border>

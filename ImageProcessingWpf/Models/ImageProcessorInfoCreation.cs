@@ -25,6 +25,7 @@
             new ImageProcessorInfoCreation("HSV Filter", "fjaowiejfioawjegoie", () => new HsvFilterProcessorInfo()),
             new ImageProcessorInfoCreation("HSL Filter", "fjaowiejfioawjegoie", () => new HslFilterProcessorInfo()),
             new ImageProcessorInfoCreation("HSV Range", "fjaowiejfioweof", () => new HsvRangeProcessorInfo()),
+            new ImageProcessorInfoCreation("Box Blur", "fjaowiejfioweof", () => new BoxBlurProcessorInfo()),
         ];
     }
 }
