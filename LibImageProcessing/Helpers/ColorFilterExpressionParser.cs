@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Irony.Parsing;
 using Silk.NET.Core.Native;
+using static LibImageProcessing.Helpers.ColorFilterExpressionParser;
 
 namespace LibImageProcessing.Helpers
 {
@@ -30,8 +31,7 @@ namespace LibImageProcessing.Helpers
                 yield return value;
             }
         }
-
-        private static IEnumerable<ValueNodeInfo> ExpressionListNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        private static IEnumerable<ValueNodeInfo> ExpressionListNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables, VectorFunction[] availableFunctions)
         {
             ParseTreeNode? nextNode = node;
 
@@ -53,8 +53,7 @@ namespace LibImageProcessing.Helpers
                 }
             }
         }
-
-        private static IEnumerable<ValueNodeInfo> ArgumentListNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        private static IEnumerable<ValueNodeInfo> ArgumentListNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables, VectorFunction[] availableFunctions)
         {
             ParseTreeNode? nextNode = node;
 
@@ -77,7 +76,7 @@ namespace LibImageProcessing.Helpers
             }
         }
 
-        private static ValueNodeInfo ExpressionNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        private static ValueNodeInfo ExpressionNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables, VectorFunction[] availableFunctions)
         {
             switch (node.Term.Name)
             {
@@ -147,10 +146,9 @@ namespace LibImageProcessing.Helpers
                 default:
                     throw new InvalidOperationException();
             }
-
         }
 
-        private static ValueNodeInfo IdentifierNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables)
+        private static ValueNodeInfo IdentifierNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables)
         {
             var identifier = node.Token.Text;
             foreach (var variable in availableVariables)
@@ -164,7 +162,7 @@ namespace LibImageProcessing.Helpers
             throw new ArgumentException($"No variable like '{identifier}'");
         }
 
-        private static ValueNodeInfo MemberAccessNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables)
+        private static ValueNodeInfo MemberAccessNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables)
         {
             List<string> accessSequence = new List<string>();
 
@@ -187,7 +185,7 @@ namespace LibImageProcessing.Helpers
             }
 
             var components = 0;
-            IEnumerable<IVectorVariable> currentVariables = availableVariables;
+            IEnumerable<VectorVariable> currentVariables = availableVariables;
             List<string> shaderAccessSequence = new List<string>();
             for (int i = accessSequence.Count - 1; i >= 0; i--)
             {
@@ -214,9 +212,9 @@ namespace LibImageProcessing.Helpers
             return new ValueNodeInfo(shaderCode, components);
         }
 
-        private static ValueNodeInfo FunctionCallNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        private static ValueNodeInfo FunctionCallNodeInfo(ParseTreeNode node, VectorVariable[] availableVariables, VectorFunction[] availableFunctions)
         {
-            switch(node.ChildNodes)
+            switch (node.ChildNodes)
             {
                 case [var identifier, var argumentList]:
                     var identifierText = identifier.Token.Text;
@@ -250,7 +248,7 @@ namespace LibImageProcessing.Helpers
 
         public delegate string ShaderExpressionDefaultComponentResolver(ValueNodeInfo[] Values, int RequiredComponentIndex);
 
-        public static string GetShaderExpression(string expression, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
+        public static string GetShaderExpression(string expression, VectorVariable[] availableVariables, VectorFunction[] availableFunctions, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
         {
             var parseTree = s_parser.Parse(expression);
             if (parseTree.HasErrors())
@@ -299,7 +297,7 @@ namespace LibImageProcessing.Helpers
 
         public static string GetShaderExpressionForFilter(string expression, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
         {
-            IVectorVariable[] vectorVariables =
+            VectorVariable[] vectorVariables =
             [
                 new VectorVariable("rgb", "rgb", 3, ['r', 'g', 'b']),
                 new VectorVariable("rgba", "rgba", 4, ['r', 'g', 'b', 'a']),
@@ -309,7 +307,7 @@ namespace LibImageProcessing.Helpers
                 new VectorVariable("hsla", "hsla", 4, ['h', 's', 'l', 'a']),
             ];
 
-            IVectorFunction[] vectorFunctions =
+            VectorFunction[] vectorFunctions =
             [
 
             ];

@@ -2,7 +2,7 @@
 {
     internal static partial class ColorFilterExpressionParser
     {
-        public class VectorVariable : IVectorVariable
+        public class VectorVariable
         {
             private readonly char[] _componentNames;
 
@@ -33,7 +33,7 @@
             public string NameInShader { get; }
             public int Components { get; }
 
-            public IEnumerable<IVectorVariable> Members
+            public IEnumerable<VectorVariable> Members
             {
                 get
                 {
@@ -47,7 +47,7 @@
                 }
             }
 
-            private static IEnumerable<IVectorVariable> GenerateCombinationsRecursive(char[] chars, string current, string currentInShader, int length)
+            private static IEnumerable<VectorVariable> GenerateCombinationsRecursive(char[] chars, string current, string currentInShader, int length)
             {
                 if (current.Length == length)
                 {
