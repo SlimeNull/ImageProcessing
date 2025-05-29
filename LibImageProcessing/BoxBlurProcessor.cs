@@ -6,15 +6,14 @@ using System.Threading.Tasks;
 
 namespace LibImageProcessing
 {
-
-    internal class AvgBlurProcessor : DxImageProcessor
+    public class BoxBlurProcessor : DxImageProcessor
     {
         public override int OutputWidth => InputWidth - BlurSize + 1;
         public override int OutputHeight => InputHeight - BlurSize + 1;
 
         public int BlurSize { get; }
 
-        public AvgBlurProcessor(int inputWidth, int inputHeight, int blurSize) : base(inputWidth, inputHeight)
+        public BoxBlurProcessor(int inputWidth, int inputHeight, int blurSize) : base(inputWidth, inputHeight)
         {
             if (blurSize < 1)
             {
