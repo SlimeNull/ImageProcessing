@@ -224,21 +224,26 @@ namespace LibImageProcessing.Helpers
                         throw new ArgumentException($"No function like '{identifierText}'");
                     }
 
-                    if (matchedFunc.Overrides.FirstOrDefault(ovrd => ovrd.Arguments.Count == argumentListNodeInfos.Length) is not { } matchedOverride)
+                    foreach (var funcOverride in matchedFunc.Overrides)
                     {
-                        throw new ArgumentException($"Function '{identifierText}' no override receives {argumentListNodeInfos.Length} arguments");
-                    }
-
-                    for (int i = 0; i < matchedOverride.Arguments.Count; i++)
-                    {
-                        var currentArgument = matchedOverride.Arguments[i];
-                        if (currentArgument.InputComponents != argumentListNodeInfos[i].Components)
+                        if (funcOverride.ArgumentComponents.Count != argumentListNodeInfos.Length)
                         {
-                            throw new ArgumentException($"Function '{identifierText}' with {argumentListNodeInfos.Length} arguments override, argument index {i}, component count not match, required: {currentArgument.InputComponents}, actual: {argumentListNodeInfos[i].Components}");
+                            continue;
                         }
+
+                        for (int i = 0; i < funcOverride.ArgumentComponents.Count; i++)
+                        {
+                            var currentArgumentComponent = funcOverride.ArgumentComponents[i];
+                            if (currentArgumentComponent != argumentListNodeInfos[i].Components)
+                            {
+                                throw new ArgumentException($"Function '{identifierText}' with {argumentListNodeInfos.Length} arguments override, argument index {i}, component count not match, required: {currentArgumentComponent}, actual: {argumentListNodeInfos[i].Components}");
+                            }
+                        }
+
+                        return new ValueNodeInfo($"{identifierText}({string.Join(", ", argumentListNodeInfos.Select(nodeInfo => nodeInfo.Text))})", funcOverride.ReturnComponents);
                     }
 
-                    return new ValueNodeInfo($"{identifierText}({string.Join(", ", argumentListNodeInfos.Select(nodeInfo => nodeInfo.Text))})", matchedOverride.ReturnComponents);
+                    throw new ArgumentException($"No matched override of function '{identifierText}'.");
 
                 default:
                     throw new InvalidOperationException();
@@ -309,7 +314,117 @@ namespace LibImageProcessing.Helpers
 
             VectorFunction[] vectorFunctions =
             [
+                new VectorFunction("abs", "abs", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
 
+                new VectorFunction("sin", "sin", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("cos", "cos", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("tan", "tan", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("asin", "asin", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("acos", "acos", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("atan", "atan", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("log", "log", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("log2", "log2", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("log10", "log10", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("sqrt", "sqrt", [
+                    new VectorFunctionOverride(1, [1]),
+                    new VectorFunctionOverride(2, [2]),
+                    new VectorFunctionOverride(3, [3]),
+                    new VectorFunctionOverride(4, [4]),
+                ]),
+
+                new VectorFunction("pow", "pow", [
+                    new VectorFunctionOverride(1, [1, 1]),
+                    new VectorFunctionOverride(2, [2, 2]),
+                    new VectorFunctionOverride(3, [3, 3]),
+                    new VectorFunctionOverride(4, [4, 4]),
+                ]),
+
+                new VectorFunction("min", "min", [
+                    new VectorFunctionOverride(1, [1, 1]),
+                    new VectorFunctionOverride(2, [2, 2]),
+                    new VectorFunctionOverride(3, [3, 3]),
+                    new VectorFunctionOverride(4, [4, 4]),
+                ]),
+
+                new VectorFunction("max", "max", [
+                    new VectorFunctionOverride(1, [1, 1]),
+                    new VectorFunctionOverride(2, [2, 2]),
+                    new VectorFunctionOverride(3, [3, 3]),
+                    new VectorFunctionOverride(4, [4, 4]),
+                ]),
+
+                new VectorFunction("lerp", "lerp", [
+                    new VectorFunctionOverride(1, [1, 1, 1]),
+                    new VectorFunctionOverride(2, [2, 2, 2]),
+                    new VectorFunctionOverride(3, [3, 3, 3]),
+                    new VectorFunctionOverride(4, [4, 4, 4]),
+                ]),
+
+                new VectorFunction("clamp", "clamp", [
+                    new VectorFunctionOverride(1, [1, 1, 1]),
+                    new VectorFunctionOverride(2, [2, 2, 2]),
+                    new VectorFunctionOverride(3, [3, 3, 3]),
+                    new VectorFunctionOverride(4, [4, 4, 4]),
+                ]),
             ];
 
             return GetShaderExpression(expression, vectorVariables, vectorFunctions, defaultComponentResolver);
