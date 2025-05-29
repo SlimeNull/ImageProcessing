@@ -9,7 +9,7 @@ namespace LibImageProcessing.Helpers
             public ColorFilterExpressionGrammar() : base(caseSensitive: true)
             {
                 // 终结符
-                var number = new NumberLiteral("number");
+                var number = new NumberLiteral("number", NumberOptions.AllowSign);
                 var identifier = new IdentifierTerminal("identifier");
 
                 // 非终结符
