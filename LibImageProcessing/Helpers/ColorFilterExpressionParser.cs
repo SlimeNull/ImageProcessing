@@ -31,7 +31,7 @@ namespace LibImageProcessing.Helpers
             }
         }
 
-        private static IEnumerable<ValueNodeInfo> ExpressionListNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables)
+        private static IEnumerable<ValueNodeInfo> ExpressionListNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
         {
             ParseTreeNode? nextNode = node;
 
@@ -40,21 +40,44 @@ namespace LibImageProcessing.Helpers
                 switch (nextNode.ChildNodes)
                 {
                     case [var expression]:
-                        yield return ExpressionNodeInfo(expression, availableVariables);
+                        yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
                         yield break;
                     case [var expressionList, var expression]:
-                        foreach (var before in ExpressionListNodeInfo(expressionList, availableVariables))
+                        foreach (var before in ExpressionListNodeInfo(expressionList, availableVariables, availableFunctions))
                         {
                             yield return before;
                         }
 
-                        yield return ExpressionNodeInfo(expression, availableVariables);
+                        yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
                         yield break;
                 }
             }
         }
 
-        private static ValueNodeInfo ExpressionNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables)
+        private static IEnumerable<ValueNodeInfo> ArgumentListNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        {
+            ParseTreeNode? nextNode = node;
+
+            while (nextNode is not null)
+            {
+                switch (nextNode.ChildNodes)
+                {
+                    case [var expression]:
+                        yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
+                        yield break;
+                    case [var expressionList, var expression]:
+                        foreach (var before in ArgumentListNodeInfo(expressionList, availableVariables, availableFunctions))
+                        {
+                            yield return before;
+                        }
+
+                        yield return ExpressionNodeInfo(expression, availableVariables, availableFunctions);
+                        yield break;
+                }
+            }
+        }
+
+        private static ValueNodeInfo ExpressionNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
         {
             switch (node.Term.Name)
             {
@@ -67,13 +90,16 @@ namespace LibImageProcessing.Helpers
                 case "memberAccess":
                     return MemberAccessNodeInfo(node, availableVariables);
 
+                case "functionCall":
+                    return FunctionCallNodeInfo(node, availableVariables, availableFunctions);
+
                 case "factor":
                     switch (node.ChildNodes.Count)
                     {
                         case 1:
-                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables);
+                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables, availableFunctions);
                         case 3:
-                            var childInfo = ExpressionNodeInfo(node.ChildNodes[1], availableVariables);
+                            var childInfo = ExpressionNodeInfo(node.ChildNodes[1], availableVariables, availableFunctions);
                             return new ValueNodeInfo($"({childInfo.Text})", childInfo.Components);
                         default:
                             throw new InvalidOperationException();
@@ -83,10 +109,10 @@ namespace LibImageProcessing.Helpers
                     switch (node.ChildNodes.Count)
                     {
                         case 1:
-                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables);
+                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables, availableFunctions);
                         case 3:
-                            var childInfo1 = ExpressionNodeInfo(node.ChildNodes[0], availableVariables);
-                            var childInfo2 = ExpressionNodeInfo(node.ChildNodes[2], availableVariables);
+                            var childInfo1 = ExpressionNodeInfo(node.ChildNodes[0], availableVariables, availableFunctions);
+                            var childInfo2 = ExpressionNodeInfo(node.ChildNodes[2], availableVariables, availableFunctions);
                             if (childInfo1.Components != 1 &&
                                 childInfo2.Components != 1)
                             {
@@ -103,10 +129,10 @@ namespace LibImageProcessing.Helpers
                     switch (node.ChildNodes.Count)
                     {
                         case 1:
-                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables);
+                            return ExpressionNodeInfo(node.ChildNodes[0], availableVariables, availableFunctions);
                         case 3:
-                            var childInfo1 = ExpressionNodeInfo(node.ChildNodes[0], availableVariables);
-                            var childInfo2 = ExpressionNodeInfo(node.ChildNodes[2], availableVariables);
+                            var childInfo1 = ExpressionNodeInfo(node.ChildNodes[0], availableVariables, availableFunctions);
+                            var childInfo2 = ExpressionNodeInfo(node.ChildNodes[2], availableVariables, availableFunctions);
                             if (childInfo1.Components != childInfo2.Components)
                             {
                                 throw new ArgumentException("Invalid term");
@@ -188,9 +214,43 @@ namespace LibImageProcessing.Helpers
             return new ValueNodeInfo(shaderCode, components);
         }
 
+        private static ValueNodeInfo FunctionCallNodeInfo(ParseTreeNode node, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions)
+        {
+            switch(node.ChildNodes)
+            {
+                case [var identifier, var argumentList]:
+                    var identifierText = identifier.Token.Text;
+                    var argumentListNodeInfos = ArgumentListNodeInfo(argumentList, availableVariables, availableFunctions).ToArray();
+                    if (availableFunctions.FirstOrDefault(f => f.Name == identifierText) is not { } matchedFunc)
+                    {
+                        throw new ArgumentException($"No function like '{identifierText}'");
+                    }
+
+                    if (matchedFunc.Overrides.FirstOrDefault(ovrd => ovrd.Arguments.Count == argumentListNodeInfos.Length) is not { } matchedOverride)
+                    {
+                        throw new ArgumentException($"Function '{identifierText}' no override receives {argumentListNodeInfos.Length} arguments");
+                    }
+
+                    for (int i = 0; i < matchedOverride.Arguments.Count; i++)
+                    {
+                        var currentArgument = matchedOverride.Arguments[i];
+                        if (currentArgument.InputComponents != argumentListNodeInfos[i].Components)
+                        {
+                            throw new ArgumentException($"Function '{identifierText}' with {argumentListNodeInfos.Length} arguments override, argument index {i}, component count not match, required: {currentArgument.InputComponents}, actual: {argumentListNodeInfos[i].Components}");
+                        }
+                    }
+
+                    return new ValueNodeInfo($"{identifierText}({string.Join(", ", argumentListNodeInfos.Select(nodeInfo => nodeInfo.Text))})", matchedOverride.ReturnComponents);
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+
         public delegate string ShaderExpressionDefaultComponentResolver(ValueNodeInfo[] Values, int RequiredComponentIndex);
 
-        public static string GetShaderExpression(string expression, IVectorVariable[] availableVariables, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
+        public static string GetShaderExpression(string expression, IVectorVariable[] availableVariables, IVectorFunction[] availableFunctions, ShaderExpressionDefaultComponentResolver defaultComponentResolver)
         {
             var parseTree = s_parser.Parse(expression);
             if (parseTree.HasErrors())
@@ -198,7 +258,7 @@ namespace LibImageProcessing.Helpers
                 throw new ArgumentException("Invalid expression");
             }
 
-            var nodeInfos = ExpressionListNodeInfo(parseTree.Root, availableVariables).ToArray();
+            var nodeInfos = ExpressionListNodeInfo(parseTree.Root, availableVariables, availableFunctions).ToArray();
 
             if (nodeInfos.Length == 0)
             {
@@ -249,7 +309,12 @@ namespace LibImageProcessing.Helpers
                 new VectorVariable("hsla", "hsla", 4, ['h', 's', 'l', 'a']),
             ];
 
-            return GetShaderExpression(expression, vectorVariables, defaultComponentResolver);
+            IVectorFunction[] vectorFunctions =
+            [
+
+            ];
+
+            return GetShaderExpression(expression, vectorVariables, vectorFunctions, defaultComponentResolver);
         }
 
         public static string GetShaderExpressionForRgbFilter(string expression)

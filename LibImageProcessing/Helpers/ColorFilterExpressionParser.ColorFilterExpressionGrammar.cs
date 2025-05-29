@@ -14,17 +14,25 @@ namespace LibImageProcessing.Helpers
 
                 // 非终结符
                 var memberAccess = new NonTerminal("memberAccess");
+                var functionCall = new NonTerminal("functionCall");
                 var factor = new NonTerminal("factor");
                 var term = new NonTerminal("term");
                 var expression = new NonTerminal("expression");
                 var expressionList = new NonTerminal("expressionList");
+                var argumentList = new NonTerminal("argumentList");
 
                 // 规则定义
                 // 成员访问: identifier(.identifier)*
                 memberAccess.Rule = identifier | memberAccess + "." + identifier;
 
-                // 因子: 数字、标识符(含成员访问)、括号内的表达式
-                factor.Rule = number | memberAccess | "(" + expression + ")";
+                // 参数列表: expression(, expression)*
+                argumentList.Rule = expression | argumentList + "," + expression;
+
+                // 函数调用: identifier(argumentList)
+                functionCall.Rule = identifier + "(" + argumentList + ")";
+
+                // 因子: 数字、标识符(含成员访问)、函数调用、括号内的表达式
+                factor.Rule = number | memberAccess | functionCall | "(" + expression + ")";
 
                 // 项: 因子 (* 或 / 因子)*
                 term.Rule = factor | term + "*" + factor | term + "/" + factor;
@@ -50,4 +58,5 @@ namespace LibImageProcessing.Helpers
             }
         }
     }
+
 }
