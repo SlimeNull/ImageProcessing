@@ -8,7 +8,7 @@
         xmlns:ctrl="clr-namespace:ImageProcessingWpf.Controls"
         xmlns:m="clr-namespace:ImageProcessingWpf.Models"
         mc:Ignorable="d"
-        Title="MainWindow" Height="650" Width="860"
+        Title="Image Processor!" Height="650" Width="860"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Loaded="Window_Loaded">
     <Window.Resources>
