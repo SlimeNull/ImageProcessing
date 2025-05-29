@@ -8,9 +8,13 @@ using LibImageProcessing;
 
 namespace ImageProcessingWpf.Models
 {
-    public abstract class ImageProcessorInfo : ObservableObject
+    public abstract partial class ImageProcessorInfo : ObservableObject
     {
         public abstract string Name { get; }
+
+        [ObservableProperty]
+        private bool _isExpanded = false;
+
         public abstract IImageProcessor CreateProcessor(int inputWidth, int inputHeight);
     }
 }

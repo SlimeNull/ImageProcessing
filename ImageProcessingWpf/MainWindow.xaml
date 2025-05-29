@@ -151,7 +151,8 @@
                                                  HeaderBorderBrush="#e0e0e0"
                                                  HeaderCircleStroke="{x:Null}"
                                                  HeaderCircleHoverStroke="{x:Null}"
-                                                 HeaderCirclePressedStroke="{x:Null}">
+                                                 HeaderCirclePressedStroke="{x:Null}"
+                                                 IsExpanded="{Binding IsExpanded}">
                                         <ws:Expander.Resources>
                                             <ws:BindingProxy x:Key="DataProxy" Data="{Binding}"/>
                                         </ws:Expander.Resources>
