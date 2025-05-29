@@ -14,7 +14,10 @@ namespace LibImageProcessing
 
         protected override void Process(Mat inputMat, Mat outputMat)
         {
-            Cv2.Scharr(inputMat, outputMat, MatType.CV_8U, 0, 1);
+            // TODO: Scharr 不能用在 8UC4 Mat 上
+
+            //Cv2.Scharr(inputMat, outputMat, MatType.CV_8U, 0, 1);
+            Cv2.GaussianBlur(inputMat, outputMat, new Size(3, 3), 0);
         }
     }
 

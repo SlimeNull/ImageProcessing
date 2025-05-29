@@ -45,7 +45,7 @@ namespace LibImageProcessing
                 fixed (byte* outputDataPtr = outputBgraData)
                 {
                     var inputMat = Mat.FromPixelData(InputHeight, InputWidth, MatType.CV_8UC4, (nint)inputDataPtr);
-                    var outputMat = Mat.FromPixelData(InputHeight, InputWidth, MatType.CV_8UC4, (nint)inputDataPtr);
+                    var outputMat = Mat.FromPixelData(OutputHeight, OutputWidth, MatType.CV_8UC4, (nint)outputDataPtr);
 
                     Process(inputMat, outputMat);
                 }
