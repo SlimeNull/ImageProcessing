@@ -216,7 +216,7 @@ namespace LibImageProcessing.Helpers
         {
             switch (node.ChildNodes)
             {
-                case [var identifier, var argumentList]:
+                case [var identifier, _, var argumentList, _]:
                     var identifierText = identifier.Token.Text;
                     var argumentListNodeInfos = ArgumentListNodeInfo(argumentList, availableVariables, availableFunctions).ToArray();
                     if (availableFunctions.FirstOrDefault(f => f.Name == identifierText) is not { } matchedFunc)

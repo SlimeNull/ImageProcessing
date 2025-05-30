@@ -245,18 +245,23 @@
                                                             </Grid>
                                                         </StackPanel>
                                                     </DataTemplate>
-                                                    <DataTemplate DataType="{x:Type m:BoxBlurProcessorInfo}">
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                                <ColumnDefinition/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="Blur Size: "
-                                                                       VerticalAlignment="Center"/>
-                                                            <ws:TextBox Margin="4 0 0 0"
-                                                                        Grid.Column="1"
-                                                                        Text="{Binding BlurSize,FallbackValue=0,UpdateSourceTrigger=PropertyChanged}"/>
-                                                        </Grid>
+                                                    <DataTemplate DataType="{x:Type m:BlurProcessorInfo}">
+                                                        <StackPanel>
+                                                            <ws:ComboBox ItemsSource="{mk:EnumValues Type=libp:BlurMethod}"
+                                                                         SelectedItem="{Binding Method}"/>
+
+                                                            <Grid Margin="0 4 0 0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Blur Size: "
+                                                                           VerticalAlignment="Center"/>
+                                                                <ws:TextBox Margin="4 0 0 0"
+                                                                            Grid.Column="1"
+                                                                            Text="{Binding BlurSize,FallbackValue=0,UpdateSourceTrigger=PropertyChanged}"/>
+                                                            </Grid>
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                     <DataTemplate DataType="{x:Type m:GrayscaleProcessorInfo}">
                                                         <Grid>

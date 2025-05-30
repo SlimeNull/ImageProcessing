@@ -30,6 +30,37 @@
             <Setter Property="CornerRadius" Value="2"/>
         </Style>
 
+        <Style TargetType="ws:ComboBox">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="HoverBackground" Value="{x:Null}"/>
+            <Setter Property="PressedBackground" Value="#F8F8F8"/>
+            <Setter Property="BorderBrush" Value="#c4c4c4"/>
+            <Setter Property="HoverBorderBrush" Value="#b2b2b2"/>
+            <Setter Property="PressedBorderBrush" Value="{x:Null}"/>
+            <Setter Property="EditableButtonBorderBrush" Value="#c4c4c4"/>
+            <Setter Property="EditableButtonHoverBorderBrush" Value="#b2b2b2"/>
+            <Setter Property="EditableButtonPressedBorderBrush" Value="{x:Null}"/>
+            <Setter Property="PopupCornerRadius" Value="4"/>
+            <Setter Property="PopupBorderBrush" Value="#c4c4c4"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8 4"/>
+
+            <Setter Property="EditableButtonCornerRadius" Value="2"/>
+        </Style>
+
+        <Style TargetType="ws:ComboBoxItem">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8 6"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="HoverBackground" Value="#f0f0f0"/>
+            <Setter Property="SelectedBackground" Value="#f8f8f8"/>
+            <Setter Property="SelectedFocusedBackground" Value="#f8f8f8"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
         <Style TargetType="ws:ContextMenu">
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Background" Value="White"/>
