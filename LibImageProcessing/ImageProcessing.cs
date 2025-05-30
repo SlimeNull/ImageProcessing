@@ -34,7 +34,7 @@ namespace LibImageProcessing
             processor.Process(source.GetPixelSpan(), dest.GetPixelSpan());
         }
 
-        public static void Process(SKBitmap source, SKBitmap dest, IProgress<int> progress, IReadOnlyList<IImageProcessor> processors)
+        public static void Process(SKBitmap source, SKBitmap dest, IProgress<int> progress, IReadOnlyList<IImageProcessor> processors, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(dest);
@@ -48,6 +48,11 @@ namespace LibImageProcessing
             if (dest.ColorType != SKColorType.Bgra8888)
             {
                 throw new ArgumentException("Invalid color type. It must be Bgra8888.", nameof(dest));
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
             }
 
             SKSizeI finalSize = new SKSizeI(source.Width, source.Height);
@@ -113,96 +118,74 @@ namespace LibImageProcessing
                 }
             }
 
-            SKBitmap currentInput = source;
-            for (int processorIndex = 0; processorIndex < processors.Count; processorIndex++)
+            try
             {
-                IImageProcessor processor = processors[processorIndex];
-                var isFirstProcessor = processorIndex == 0;
-                var isLastProcessor = processorIndex == processors.Count - 1;
-
-                var inputSize = new SKSizeI(processor.InputWidth, processor.InputHeight);
-                var outputSize = new SKSizeI(processor.OutputWidth, processor.OutputHeight);
-
-                SKBitmap? outputBuffer;
-                if (!isLastProcessor)
+                SKBitmap currentInput = source;
+                for (int processorIndex = 0; processorIndex < processors.Count; processorIndex++)
                 {
-                    if (buffers.TryGetValue(outputSize, out outputBuffer))
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        buffers.Remove(outputSize);
+                        return;
                     }
-                    else if (alterBuffers.TryGetValue(outputSize, out outputBuffer))
+
+                    IImageProcessor processor = processors[processorIndex];
+                    var isFirstProcessor = processorIndex == 0;
+                    var isLastProcessor = processorIndex == processors.Count - 1;
+
+                    var inputSize = new SKSizeI(processor.InputWidth, processor.InputHeight);
+                    var outputSize = new SKSizeI(processor.OutputWidth, processor.OutputHeight);
+
+                    SKBitmap? outputBuffer;
+                    if (!isLastProcessor)
                     {
-                        alterBuffers.Remove(outputSize);
+                        if (buffers.TryGetValue(outputSize, out outputBuffer))
+                        {
+                            buffers.Remove(outputSize);
+                        }
+                        else if (alterBuffers.TryGetValue(outputSize, out outputBuffer))
+                        {
+                            alterBuffers.Remove(outputSize);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("This would never happen");
+                        }
                     }
                     else
                     {
-                        throw new InvalidOperationException("This would never happen");
+                        outputBuffer = dest;
                     }
-                }
-                else
-                {
-                    outputBuffer = dest;
-                }
 
-                processor.Process(currentInput.GetPixelSpan(), outputBuffer.GetPixelSpan());
-                progress?.Report(processorIndex + 1);
+                    processor.Process(currentInput.GetPixelSpan(), outputBuffer.GetPixelSpan());
+                    progress?.Report(processorIndex + 1);
 
-                if (!isFirstProcessor)
-                {
-                    if (!buffers.ContainsKey(inputSize))
+                    if (!isFirstProcessor)
                     {
-                        buffers[inputSize] = currentInput;
+                        if (!buffers.ContainsKey(inputSize))
+                        {
+                            buffers[inputSize] = currentInput;
+                        }
+                        else if (!alterBuffers.ContainsKey(inputSize))
+                        {
+                            alterBuffers[inputSize] = currentInput;
+                        }
                     }
-                    else if (!alterBuffers.ContainsKey(inputSize))
-                    {
-                        alterBuffers[inputSize] = currentInput;
-                    }
+
+                    currentInput = outputBuffer;
+                }
+            }
+            finally
+            {
+                foreach (var buffer in buffers.Values)
+                {
+                    buffer.Dispose();
                 }
 
-                currentInput = outputBuffer;
+                foreach (var buffer in alterBuffers.Values)
+                {
+                    buffer.Dispose();
+                }
             }
-
-            foreach (var buffer in buffers.Values)
-            {
-                buffer.Dispose();
-            }
-
-            foreach (var buffer in alterBuffers.Values)
-            {
-                buffer.Dispose();
-            }
-        }
-
-        public static void Process(SKBitmap source, SKBitmap dest, params IImageProcessor[] processors)
-        {
-            Process(source, dest, processors);
-        }
-
-        public static SKBitmap Process(SKBitmap source, IImageProcessor processor)
-        {
-            ArgumentNullException.ThrowIfNull(source);
-            ArgumentNullException.ThrowIfNull(processor);
-
-            if (source.ColorType != SKColorType.Bgra8888)
-            {
-                throw new ArgumentException("Invalid color type. It must be Bgra8888.", nameof(source));
-            }
-
-            if (processor.InputWidth != source.Width ||
-                processor.InputHeight != source.Height)
-            {
-                throw new ArgumentException("Invalid processor input size.", nameof(processor));
-            }
-
-            SKBitmap dest = new SKBitmap(processor.OutputWidth, processor.OutputHeight, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-            processor.Process(source.GetPixelSpan(), dest.GetPixelSpan());
-
-            return dest;
-        }
-
-        public static SKBitmap Process(SKBitmap source, params IImageProcessor[] processors)
-        {
-            throw new NotImplementedException();
         }
     }
 }
